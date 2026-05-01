@@ -140,9 +140,9 @@ judger = Judger(strict_extract=False)
 pending_results = []
 
 # for full run use: range(start_idx, len(data))
-end_idx = min(len(data), start_idx + 20)  # REMOVE +20 later
+# testing: use "start_idx, end_idx" and end_idx = min(len(data), start_idx + 20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, end_idx)):
+for idx in tqdm(range(start_idx, len(data))):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
