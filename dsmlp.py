@@ -140,7 +140,8 @@ judger = Judger(strict_extract=False)
 pending_results = []
 
 # for full run use: range(start_idx, len(data))
-# testing: use "start_idx, end_idx" and end_idx = min(len(data), start_idx + 20)  # REMOVE +20 later
+# testing: use "start_idx, end_idx" 
+#end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
 for idx in tqdm(range(start_idx, len(data))):
     item = data[idx]
@@ -190,7 +191,7 @@ for idx in tqdm(range(start_idx, len(data))):
 
     # -------- SAVE EVERY BATCH --------
 
-    if len(pending_results) == BATCH_SIZE or idx == end_idx - 1:
+    if len(pending_results) == BATCH_SIZE or idx == len(data) - 1:
         with open(out_path, "a") as f:
             for r in pending_results:
                 if SAVE_EVAL:
