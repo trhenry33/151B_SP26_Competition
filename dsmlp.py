@@ -53,7 +53,7 @@ SYSTEM_PROMPT_MATH = (
     "e.g. \\boxed{3, 7}."
 )
 
-SYSTEM_PROMPAT_MCQ = (
+SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
     "Read the problem and the answer choices below, then select the single best answer. "
     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
