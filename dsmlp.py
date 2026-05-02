@@ -15,7 +15,7 @@ from typing import Optional
 
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
-DATA_PATH   = "data/public.jsonl"
+DATA_PATH   = "data/private.jsonl"
 OUTPUT_PATH = "results/starter_results.jsonl"
 
 
@@ -103,7 +103,7 @@ sampling_params = SamplingParams(
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
 
-SAVE_EVAL = True
+SAVE_EVAL = False
 BATCH_SIZE = 10
 
 out_path = Path(OUTPUT_PATH)
