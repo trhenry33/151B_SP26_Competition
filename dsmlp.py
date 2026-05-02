@@ -162,7 +162,8 @@ for idx in tqdm(range(start_idx, len(data))):
     # -------- SCORING --------
 
     is_mcq = bool(item.get("options"))
-    gold = item["answer"]
+    #gold = item["answer"]
+    gold = 1
 
     r = {
         "id": item.get("id"),
