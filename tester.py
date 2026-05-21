@@ -9,7 +9,8 @@ print("imports work")
 
 #imports
 #baseline is 60% with first 10
-#basline is --% with first 20
+#basline is 50% with first 20 - MC: 4/9 FR: 6/11
+#reflection is same as baseline
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
@@ -22,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test_baseline_20.jsonl"
+OUTPUT_PATH = "results/starter_results_test_reflection_20.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
