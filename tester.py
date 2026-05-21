@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/fewshot_examples_20.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_16384_tokens_20.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -143,14 +143,14 @@ for label, item in [("MCQ", mcq_sample), ("Free-form", free_sample)]:
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
 
-MAX_TOKENS = 8192   # start big
+MAX_TOKENS = 16384   # doubled generation budget
 
 llm = LLM(
     model=MODEL_ID,
     quantization="bitsandbytes",
     load_format="bitsandbytes",
     gpu_memory_utilization=0.9,   # lower this
-    max_model_len=12288,            # critical
+    max_model_len=24576,            # allow longer prompts + doubled generation
     trust_remote_code=True,
     max_num_seqs=1,
     max_num_batched_tokens=4096,
