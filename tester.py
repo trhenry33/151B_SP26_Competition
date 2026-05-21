@@ -11,10 +11,11 @@ print("imports work")
 #baseline is 60% with first 10
 #basline is 50% with first 20 - MC: 4/9 FR: 6/11
 #reflection is same as baseline
+#self consistency is same
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
-#travis test path so far: baseline -> reflective _> MC self consistency
+#travis test path so far: baseline -> reflective _> MC self consistency _> chain of thought
 
 import json, os, re, sys
 from pathlib import Path
@@ -23,7 +24,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test_reflection_selfconsistency_20.jsonl"
+OUTPUT_PATH = "results/starter_results_test_reflection_selfconsistency_chain_20.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -55,6 +56,8 @@ print(json.dumps(free_sample, indent=2))
 
 SYSTEM_PROMPT_MATH = (
     "You are an expert mathematician. Solve the problem step-by-step. "
+    "Think through the problem step-by-step before answering. "
+    "Show your reasoning clearly and logically. "
     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
     "Put your final answer inside \\boxed{}. "
     "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
@@ -63,6 +66,8 @@ SYSTEM_PROMPT_MATH = (
 
 SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
+    "Think through the problem step-by-step before answering. "
+    "Show your reasoning clearly and logically. "
     "Solve the problem carefully and consider multiple possible solution paths before choosing an answer. "
     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
     "Verify the final choice against all options. "
