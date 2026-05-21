@@ -54,19 +54,72 @@ print(json.dumps(free_sample, indent=2))
 #prompt
 
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve the problem step-by-step. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
-    "Put your final answer inside \\boxed{}. "
-    "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
+    "You are an expert mathematician. Solve the problem carefully and briefly. "
+    "Use the <think> section for working, then give the final answer only inside a single \\boxed{}. "
+    "The boxed answer must be the last line and must contain no extra words. "
+    "Before finalizing, verify calculations, algebra, and formatting mistakes. "
+    "If the problem has multiple sub-answers, separate them by commas inside one \\boxed{}, "
     "e.g. \\boxed{3, 7}."
 )
 
 SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
     "Read the problem and the answer choices below, then select the single best answer. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
+    "Use the <think> section for a short justification, then output only the chosen letter inside a single \\boxed{}. "
+    "The boxed answer must be the last line and must contain no extra words. "
+    "Before finalizing, verify calculations, option matching, and formatting mistakes. "
     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
 )
+
+FEWSHOT_MATH = """Here are solved examples of the required answer style.
+
+Example 1
+Problem: Compute 6 * 7.
+<think>
+6 * 7 = 42.
+</think>
+\\boxed{42}
+
+Example 2
+Problem: Simplify 12/16.
+<think>
+Divide numerator and denominator by 4 to get 3/4.
+</think>
+\\boxed{\\frac{3}{4}}
+
+Now solve the next problem in the same format.
+"""
+
+FEWSHOT_MCQ = """Here are solved examples of the required answer style.
+
+Example 1
+Problem: Which option equals 9 - 4?
+Options:
+A. 3
+B. 5
+C. 7
+<think>
+9 - 4 = 5, so option B is correct.
+</think>
+\\boxed{B}
+
+Example 2
+Problem: Which option is the next number after 8?
+Options:
+A. 7
+B. 9
+C. 10
+<think>
+The next integer after 8 is 9, so option B is correct.
+</think>
+\\boxed{B}
+
+Now solve the next problem in the same format.
+"""
+
+
+def build_few_shot_block(options: Optional[list]) -> str:
+    return FEWSHOT_MCQ if options else FEWSHOT_MATH
 
 
 def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
@@ -74,8 +127,10 @@ def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
     if options:
         labels    = [chr(65 + i) for i in range(len(options))]
         opts_text = "\n".join(f"{lbl}. {opt.strip()}" for lbl, opt in zip(labels, options))
-        return SYSTEM_PROMPT_MCQ, f"{question}\n\nOptions:\n{opts_text}"
-    return SYSTEM_PROMPT_MATH, question
+        user_prompt = f"{build_few_shot_block(options)}\n\nQuestion:\n{question}\n\nOptions:\n{opts_text}"
+        return SYSTEM_PROMPT_MCQ, user_prompt
+    user_prompt = f"{build_few_shot_block(options)}\n\nQuestion:\n{question}"
+    return SYSTEM_PROMPT_MATH, user_prompt
 
 
 # Verify with samples
