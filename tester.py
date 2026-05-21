@@ -9,7 +9,7 @@ print("imports work")
 
 #imports
 #baseline is 60% with first 10
-#basline is --% with first 20
+#basline is 50% with first 20 - MC: 4/9 FR: 6/11
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
