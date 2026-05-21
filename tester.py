@@ -8,6 +8,7 @@ print("imports work")
 
 
 #imports
+#baseline is 50% with first 10
 
 import json, os, re, sys
 from pathlib import Path
@@ -16,7 +17,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test.jsonl"
+OUTPUT_PATH = "results/starter_results_test_baseline_10.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -143,7 +144,7 @@ pending_results = []
 # testing: use "start_idx, end_idx" 
 #end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, start_idx+5)):
+for idx in tqdm(range(start_idx, start_idx+10)):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
