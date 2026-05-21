@@ -14,7 +14,7 @@ print("imports work")
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
-#travis test path so far: baseline -> reflective
+#travis test path so far: baseline -> reflective _> MC self consistency
 
 import json, os, re, sys
 from pathlib import Path
@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test_reflection_20.jsonl"
+OUTPUT_PATH = "results/starter_results_test_reflection_selfconsistency_20.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -63,8 +63,9 @@ SYSTEM_PROMPT_MATH = (
 
 SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
-    "Read the problem and the answer choices below, then select the single best answer. "
+    "Solve the problem carefully and consider multiple possible solution paths before choosing an answer. "
     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
+    "Verify the final choice against all options. "
     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
 )
 
