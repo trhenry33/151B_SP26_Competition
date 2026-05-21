@@ -162,6 +162,7 @@ sampling_params = SamplingParams(
 
 SAVE_EVAL = False
 BATCH_SIZE = 10
+RUN_LIMIT = 20
 
 out_path = Path(OUTPUT_PATH)
 out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -174,7 +175,8 @@ if count_path.exists():
 else:
     start_idx = 0
 
-print(f"Starting from index {start_idx}")
+run_end_idx = min(len(data), start_idx + RUN_LIMIT)
+print(f"Starting run at index {start_idx}; ending before {run_end_idx} (limit {RUN_LIMIT} items)", flush=True)
 
 # -------- SCORING HELPERS --------
 
@@ -196,12 +198,18 @@ judger = Judger(strict_extract=False)
 
 pending_results = []
 
-# for full run use: range(start_idx, len(data))
-# testing: use "start_idx, end_idx" 
-#end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
+if start_idx >= run_end_idx:
+    print("Run limit reached for this resume point; nothing to process.", flush=True)
 
-for idx in tqdm(range(start_idx, len(data))):
+for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
     item = data[idx]
+    item_num = idx - start_idx + 1
+    total_items = max(run_end_idx - start_idx, 0)
+    print(
+        f"[{item_num}/{total_items}] Processing id={item.get('id')} "
+        f"({'MCQ' if item.get('options') else 'free-form'})",
+        flush=True,
+    )
 
     system, user = build_prompt(item["question"], item.get("options"))
     prompt_text = tokenizer.apply_chat_template(
@@ -215,6 +223,7 @@ for idx in tqdm(range(start_idx, len(data))):
 
     output = llm.generate([prompt_text], sampling_params=sampling_params)
     response = output[0].outputs[0].text.strip()
+    print(f"[{item_num}/{total_items}] Response preview: {response[:120].replace(chr(10), ' ')}", flush=True)
 
     # -------- SCORING --------
 
@@ -249,7 +258,7 @@ for idx in tqdm(range(start_idx, len(data))):
 
     # -------- SAVE EVERY BATCH --------
 
-    if len(pending_results) == BATCH_SIZE or idx == len(data) - 1:
+    if len(pending_results) == BATCH_SIZE or idx == run_end_idx - 1:
         with open(out_path, "a") as f:
             for r in pending_results:
                 if SAVE_EVAL:
@@ -272,7 +281,7 @@ for idx in tqdm(range(start_idx, len(data))):
         saved_count = idx + 1
         count_path.write_text(str(saved_count))
 
-        print(f"Saved through item {saved_count}")
+        print(f"Saved through item {saved_count}; batch size {len(pending_results)}", flush=True)
         pending_results = []
 
 
@@ -280,7 +289,7 @@ for idx in tqdm(range(start_idx, len(data))):
 #score
 
 results = [json.loads(line) for line in open(OUTPUT_PATH)]
-print(f"Scoring complete. {len(results)} results.")
+print(f"Scoring complete. {len(results)} results.", flush=True)
 
 mcq_res  = [r for r in results if r["is_mcq"]]
 free_res = [r for r in results if not r["is_mcq"]]
