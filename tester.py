@@ -9,6 +9,11 @@ print("imports work")
 
 #imports
 #baseline is 60% with first 10
+#basline is --% with first 20
+
+#to test: rm results/count.txt and change the output path on this file to start a new file to check.
+
+#travis test path so far: baseline -> reflective
 
 import json, os, re, sys
 from pathlib import Path
@@ -49,6 +54,7 @@ print(json.dumps(free_sample, indent=2))
 
 SYSTEM_PROMPT_MATH = (
     "You are an expert mathematician. Solve the problem step-by-step. "
+    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
     "Put your final answer inside \\boxed{}. "
     "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
     "e.g. \\boxed{3, 7}."
@@ -57,6 +63,7 @@ SYSTEM_PROMPT_MATH = (
 SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
     "Read the problem and the answer choices below, then select the single best answer. "
+    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
 )
 
