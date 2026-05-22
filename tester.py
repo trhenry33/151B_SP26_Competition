@@ -25,7 +25,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test_reflection_selfconsistency_chain_20.jsonl"
+OUTPUT_PATH = "results/starter_results_test_reflection_selfconsistency_chain_example_20.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
