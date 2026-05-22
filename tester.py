@@ -13,6 +13,7 @@ print("imports work")
 #reflection is same as baseline
 #self consistency is same
 #chain of thought is same
+#fewshot with others : 55%
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
@@ -55,25 +56,44 @@ print(json.dumps(free_sample, indent=2))
 
 #prompt
 
+# SYSTEM_PROMPT_MATH = (
+#     "You are an expert mathematician. Solve the problem step-by-step. "
+#     "Think through the problem step-by-step before answering. "
+#     "Show your reasoning clearly and logically. "
+#     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
+#     "Put your final answer inside \\boxed{}. "
+#     "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
+#     "e.g. \\boxed{3, 7}."
+# )
+
+# SYSTEM_PROMPT_MCQ = (
+#     "You are an expert mathematician. "
+#     "Think through the problem step-by-step before answering. "
+#     "Show your reasoning clearly and logically. "
+#     "Solve the problem carefully and consider multiple possible solution paths before choosing an answer. "
+#     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
+#     "Verify the final choice against all options. "
+#     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
+# )
+
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve the problem step-by-step. "
-    "Think through the problem step-by-step before answering. "
-    "Show your reasoning clearly and logically. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
-    "Put your final answer inside \\boxed{}. "
-    "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
+    "You are an expert mathematician. Solve the problem carefully and briefly. "
+    "Use the <think> section for working, then give the final answer only inside a single \\boxed{}. "
+    "The boxed answer must be the last line and must contain no extra words. "
+    "Before finalizing, verify calculations, algebra, and formatting mistakes. "
+    "If the problem has multiple sub-answers, separate them by commas inside one \\boxed{}, "
     "e.g. \\boxed{3, 7}."
 )
 
 SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
-    "Think through the problem step-by-step before answering. "
-    "Show your reasoning clearly and logically. "
-    "Solve the problem carefully and consider multiple possible solution paths before choosing an answer. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
-    "Verify the final choice against all options. "
+    "Read the problem and the answer choices below, then select the single best answer. "
+    "Use the <think> section for a short justification, then output only the chosen letter inside a single \\boxed{}. "
+    "The boxed answer must be the last line and must contain no extra words. "
+    "Before finalizing, verify calculations, option matching, and formatting mistakes. "
     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
 )
+
 
 FEWSHOT_MATH = """
         Here are solved examples of the required answer style.
