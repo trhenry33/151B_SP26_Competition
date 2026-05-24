@@ -1,6 +1,6 @@
 import json
 
-INPUT = "../data/public.jsonl"
+INPUT = "data/public.jsonl"
 OUTPUT = "data/sft_train.jsonl"
 
 def make_target(item):
