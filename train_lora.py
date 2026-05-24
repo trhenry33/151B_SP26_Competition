@@ -4,9 +4,18 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from peft import LoraConfig
 from trl import SFTTrainer, SFTConfig
 
+import os
+
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "0"
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+
 MODEL_ID = "Qwen/Qwen3-4B-Thinking-2507"
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(
+    MODEL_ID,
+    trust_remote_code=True,
+    local_files_only=True,
+)
 tokenizer.pad_token = tokenizer.eos_token
 
 def formatting_func(example):
@@ -27,6 +36,7 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,
     quantization_config=bnb_config,
     device_map="auto",
+    local_files_only=True,
 )
 
 dataset = load_dataset("json", data_files="data/sft_train.jsonl", split="train")
