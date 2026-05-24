@@ -24,7 +24,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/grpo_style_20_items.jsonl"
+OUTPUT_PATH = "results/grpo_style_20_items_updated.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -158,16 +158,26 @@ llm = LLM(
 )
 
 # GRPO-style grouped sampling: generate multiple completions per question.
-NUM_SAMPLES = 3
+MCQ_SAMPLES = 3
+FREE_INITIAL_SAMPLES = 1
+FREE_FALLBACK_SAMPLES = 2
+PRIMARY_TEMPERATURE = 0.7
+FALLBACK_TEMPERATURE = 0.9
+VERIFIER_TEMPERATURE = 0.0
+VERIFIER_MAX_TOKENS = 256
 
-sampling_params = SamplingParams(
-    max_tokens=MAX_TOKENS,
-    temperature=0.8,
-    top_p=0.95,
-    top_k=20,
-    repetition_penalty=1.0,
-    n=NUM_SAMPLES,
-)
+
+def sample_responses(prompt_text: str, num_samples: int, temperature: float, max_tokens: int = MAX_TOKENS) -> list[str]:
+    sampling_params = SamplingParams(
+        max_tokens=max_tokens,
+        temperature=temperature,
+        top_p=0.95,
+        top_k=20,
+        repetition_penalty=1.0,
+        n=num_samples,
+    )
+    output = llm.generate([prompt_text], sampling_params=sampling_params)
+    return [candidate.text.strip() for candidate in output[0].outputs]
 
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
@@ -189,7 +199,10 @@ else:
 
 run_end_idx = min(len(data), start_idx + RUN_LIMIT)
 print(f"Starting run at index {start_idx}; ending before {run_end_idx} (limit {RUN_LIMIT} items)", flush=True)
-print(f"Using GRPO-style grouped sampling with {NUM_SAMPLES} samples per question.", flush=True)
+print(
+    f"Using adaptive grouped sampling (MCQ={MCQ_SAMPLES}, free-form initial={FREE_INITIAL_SAMPLES}, fallback={FREE_FALLBACK_SAMPLES}).",
+    flush=True,
+)
 
 # -------- SCORING HELPERS --------
 
@@ -335,6 +348,90 @@ def pick_best_sample(responses: list[str], rewards: list[float]) -> tuple[int, s
     return best_idx, responses[best_idx]
 
 
+def format_confidence(response: str, extracted_answer: str, is_mcq: bool) -> float:
+    confidence = 0.0
+    if extracted_answer:
+        confidence += 1.0
+    if is_mcq:
+        if re.search(r"\\boxed\{[A-Z]\}", response):
+            confidence += 0.5
+        elif extract_letter(response):
+            confidence += 0.15
+    else:
+        if "\\boxed" in response:
+            confidence += 0.5
+        if response.count("\n") <= 4:
+            confidence += 0.1
+        if len(response) > 400:
+            confidence -= 0.1
+    return confidence
+
+
+def candidate_reward(response: str, extracted_answer: str, consensus_count: int, is_mcq: bool) -> float:
+    reward = format_confidence(response, extracted_answer, is_mcq)
+    if consensus_count > 1:
+        reward += 0.25 * (consensus_count - 1)
+    return reward
+
+
+def should_add_fallback(responses: list[str], extracted_answers: list[str], is_mcq: bool) -> bool:
+    if is_mcq:
+        if any(not answer for answer in extracted_answers):
+            return True
+        return len(set(extracted_answers)) > 1 and Counter(extracted_answers).most_common(1)[0][1] == 1
+
+    if not extracted_answers or not extracted_answers[0]:
+        return True
+    first_response = responses[0] if responses else ""
+    return "\\boxed" not in first_response or len(first_response.splitlines()) > 8
+
+
+def build_verifier_prompt(question: str, options: Optional[list], candidate_responses: list[str], candidate_answers: list[str], is_mcq: bool) -> str:
+    if options:
+        labels = [chr(65 + i) for i in range(len(options))]
+        opts_text = "\n".join(f"{lbl}. {opt.strip()}" for lbl, opt in zip(labels, options))
+        question_block = f"Question:\n{question}\n\nOptions:\n{opts_text}"
+    else:
+        question_block = f"Question:\n{question}"
+
+    candidate_blocks = []
+    for idx, (response, answer) in enumerate(zip(candidate_responses, candidate_answers), start=1):
+        candidate_blocks.append(
+            f"Candidate {idx}:\nResponse:\n{response}\nExtracted answer: {answer or '[none]'}"
+        )
+
+    verifier_intro = (
+        "You are a strict math verifier. Compare the candidates and select the single best final answer. "
+        "If the candidates disagree, prefer the one that is mathematically correct and in the right output format. "
+        "Return only the final answer in the required format, with no explanation."
+    )
+    if is_mcq:
+        verifier_intro += " For multiple-choice problems, output only the letter inside \\boxed{}."
+    else:
+        verifier_intro += " For free-form problems, output only the final answer inside \\boxed{}."
+
+    return f"{verifier_intro}\n\n{question_block}\n\n" + "\n\n".join(candidate_blocks)
+
+
+def verifier_choose(question: str, options: Optional[list], candidate_responses: list[str], candidate_answers: list[str], is_mcq: bool) -> str:
+    verifier_prompt = build_verifier_prompt(question, options, candidate_responses, candidate_answers, is_mcq)
+    verifier_chat_prompt = tokenizer.apply_chat_template(
+        [
+            {"role": "system", "content": "You are a strict math verifier."},
+            {"role": "user", "content": verifier_prompt},
+        ],
+        tokenize=False,
+        add_generation_prompt=True,
+    )
+    verifier_response = sample_responses(
+        verifier_chat_prompt,
+        num_samples=1,
+        temperature=VERIFIER_TEMPERATURE,
+        max_tokens=VERIFIER_MAX_TOKENS,
+    )[0]
+    return verifier_response
+
+
 sys.path.insert(0, ".")
 from judger import Judger
 judger = Judger(strict_extract=False)
@@ -366,25 +463,59 @@ for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
         add_generation_prompt=True,
     )
 
-    print(f"[{item_num}/{total_items}] Generating {NUM_SAMPLES} grouped samples...", flush=True)
-    output = llm.generate([prompt_text], sampling_params=sampling_params)
-    responses = [candidate.text.strip() for candidate in output[0].outputs]
-    print(f"[{item_num}/{total_items}] Generation finished.", flush=True)
-
     is_mcq = bool(item.get("options"))
     gold = item["answer"]
 
-    rewards = [reward_from_response(response, gold) for response in responses]
+    if is_mcq:
+        print(f"[{item_num}/{total_items}] Generating {MCQ_SAMPLES} MCQ candidates...", flush=True)
+        responses = sample_responses(prompt_text, num_samples=MCQ_SAMPLES, temperature=PRIMARY_TEMPERATURE)
+    else:
+        print(f"[{item_num}/{total_items}] Generating 1 free-form candidate...", flush=True)
+        responses = sample_responses(prompt_text, num_samples=FREE_INITIAL_SAMPLES, temperature=PRIMARY_TEMPERATURE)
+
+    extracted_samples = [extract_letter(response) if is_mcq else extract_boxed_answer(response) for response in responses]
+    needs_fallback = should_add_fallback(responses, extracted_samples, is_mcq)
+
+    if needs_fallback and not is_mcq:
+        print(f"[{item_num}/{total_items}] Free-form answer looks uncertain; sampling {FREE_FALLBACK_SAMPLES} more candidates...", flush=True)
+        extra_responses = sample_responses(prompt_text, num_samples=FREE_FALLBACK_SAMPLES, temperature=FALLBACK_TEMPERATURE)
+        responses.extend(extra_responses)
+        extracted_samples = [extract_letter(response) if is_mcq else extract_boxed_answer(response) for response in responses]
+    elif needs_fallback and is_mcq:
+        print(f"[{item_num}/{total_items}] MCQ candidates disagree; keeping verifier path active.", flush=True)
+
+    print(f"[{item_num}/{total_items}] Generation finished with {len(responses)} candidates.", flush=True)
+
+    answer_counts = Counter(extracted_samples)
+    rewards = [candidate_reward(response, extracted, answer_counts[extracted], is_mcq) for response, extracted in zip(responses, extracted_samples)]
     advantages = compute_group_advantages(rewards)
     best_idx, best_response = pick_best_sample(responses, rewards)
 
-    extracted_samples = [extract_letter(response) if is_mcq else extract_boxed_answer(response) for response in responses]
     reward_summary = ", ".join(f"{i}:{reward:.2f}" for i, reward in enumerate(rewards))
     advantage_summary = ", ".join(f"{i}:{adv:.2f}" for i, adv in enumerate(advantages))
 
     print(f"[{item_num}/{total_items}] Rewards: {reward_summary}", flush=True)
     print(f"[{item_num}/{total_items}] Advantages: {advantage_summary}", flush=True)
     print(f"[{item_num}/{total_items}] Best sample index: {best_idx}", flush=True)
+
+    if is_mcq:
+        top_count = answer_counts.most_common(1)[0][1] if answer_counts else 0
+        if top_count == 1 or needs_fallback:
+            print(f"[{item_num}/{total_items}] Running verifier rerank for MCQ...", flush=True)
+            verifier_response = verifier_choose(item["question"], item.get("options"), responses, extracted_samples, is_mcq=True)
+            verifier_answer = extract_letter(verifier_response)
+            if verifier_answer:
+                best_response = verifier_response
+                best_idx = -1
+                print(f"[{item_num}/{total_items}] Verifier selected MCQ answer: {verifier_answer}", flush=True)
+    else:
+        print(f"[{item_num}/{total_items}] Running verifier rerank for free-form...", flush=True)
+        verifier_response = verifier_choose(item["question"], item.get("options"), responses, extracted_samples, is_mcq=False)
+        verifier_answer = extract_boxed_answer(verifier_response)
+        if verifier_answer:
+            best_response = verifier_response
+            best_idx = -1
+            print(f"[{item_num}/{total_items}] Verifier selected free-form answer: {verifier_answer}", flush=True)
 
     # -------- SCORING --------
 
