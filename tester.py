@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/fewshot_examples_16384_tokens_20.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_16384_tokens_100.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -169,12 +169,12 @@ sampling_params = SamplingParams(
 
 SAVE_EVAL = True
 BATCH_SIZE = 5
-RUN_LIMIT = 20
+RUN_LIMIT = 100
 
 out_path = Path(OUTPUT_PATH)
 out_path.parent.mkdir(parents=True, exist_ok=True)
 
-count_path = out_path.parent / "count.txt"
+count_path = out_path.parent / f"{out_path.stem}_count.txt"
 
 # Resume point
 if count_path.exists():
