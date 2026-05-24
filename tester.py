@@ -14,10 +14,12 @@ print("imports work")
 #self consistency is same
 #chain of thought is same
 #fewshot with others : 55%
+#jsut fewshot: 65%
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
 #travis test path so far: baseline -> reflective _> MC self consistency _> chain of thought -> fewshot example
+#new travis path: baseline -> fewshot -> SFT/LoRA
 
 import json, os, re, sys
 from pathlib import Path
@@ -178,19 +180,23 @@ for label, item in [("MCQ", mcq_sample), ("Free-form", free_sample)]:
 
 #load model
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
+from transformers import AutoTokenizer
+from vllm import LLM, SamplingParams
 
-MAX_TOKENS = 8192   # start big
+MODEL_ID = "Qwen/Qwen3-4B-Thinking-2507"
+
+tokenizer = AutoTokenizer.from_pretrained(
+    MODEL_ID,
+    trust_remote_code=True,
+)
 
 llm = LLM(
     model=MODEL_ID,
-    quantization="bitsandbytes",
-    load_format="bitsandbytes",
-    gpu_memory_utilization=0.9,   # lower this
-    max_model_len=12288,            # critical
+    enable_lora=True,
+    max_lora_rank=16,
     trust_remote_code=True,
-    max_num_seqs=1,
-    max_num_batched_tokens=4096,
+    gpu_memory_utilization=0.9,
+    max_model_len=8192,
 )
 
 sampling_params = SamplingParams(
@@ -244,7 +250,7 @@ pending_results = []
 # testing: use "start_idx, end_idx" 
 #end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, start_idx+20)):
+for idx in tqdm(range(start_idx, 20)):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
@@ -257,7 +263,17 @@ for idx in tqdm(range(start_idx, start_idx+20)):
         add_generation_prompt=True,
     )
 
-    output = llm.generate([prompt_text], sampling_params=sampling_params)
+    from vllm.lora.request import LoRARequest
+
+    outputs = llm.generate(
+        [prompt_text],
+        sampling_params=sampling_params,
+        lora_request=LoRARequest(
+            "math_adapter",
+            1,
+            "qwen_math_lora"
+        )
+    )
     response = output[0].outputs[0].text.strip()
 
     # -------- SCORING --------

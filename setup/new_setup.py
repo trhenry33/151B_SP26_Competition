@@ -54,4 +54,6 @@ verify_commands = [
 for code in verify_commands:
     subprocess.run([sys.executable, "-c", code], check=True)
 
+subprocess.run([sys.executable, "-m","pip", "install","--user","peft","trl","datasets","accelerate"])
+
 print("\nSetup complete.")
