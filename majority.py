@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/majority_vote_5x20_16k_tokens.jsonl"
+OUTPUT_PATH = "results/majority_vote_3x20_16k_tokens.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -156,7 +156,7 @@ llm = LLM(
     max_num_batched_tokens=4096,
 )
 
-NUM_SAMPLES = 5
+NUM_SAMPLES = 3
 
 sampling_params = SamplingParams(
     max_tokens=MAX_TOKENS,
