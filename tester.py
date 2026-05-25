@@ -198,7 +198,7 @@ llm = LLM(
     gpu_memory_utilization=0.9,
     max_model_len=8192,
 )
-
+MAX_TOKENS = 8192
 sampling_params = SamplingParams(
     max_tokens=MAX_TOKENS,
     temperature=0.6,
@@ -274,7 +274,7 @@ for idx in tqdm(range(start_idx, 20)):
             "qwen_math_lora"
         )
     )
-    response = output[0].outputs[0].text.strip()
+    response = outputs[0].outputs[0].text.strip()
 
     # -------- SCORING --------
 
