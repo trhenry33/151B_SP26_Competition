@@ -9,7 +9,7 @@ import os
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "0"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 
-MODEL_ID = "models/qwen3-4b-thinking"
+MODEL_ID = "Qwen/Qwen3-4B-Thinking-2507"
 
 tokenizer = AutoTokenizer.from_pretrained(
     MODEL_ID,
