@@ -1,17 +1,22 @@
 import json
 
-INPUT = "data/public.jsonl"
-OUTPUT = "data/sft_train.jsonl"
+PUBLIC = "data/public.jsonl"
+RESULTS = "results/best_fewshot_public.jsonl"
+OUTPUT = "data/sft_train_good_outputs.jsonl"
 
-def make_target(item):
-    ans = item["answer"]
-    if isinstance(ans, list):
-        ans = ", ".join(map(str, ans))
-    return f"<think>\nWe solve carefully and verify the result.\n</think>\n\\boxed{{{ans}}}"
+questions = {}
+for line in open(PUBLIC):
+    item = json.loads(line)
+    questions[item["id"]] = item
 
-with open(INPUT) as fin, open(OUTPUT, "w") as fout:
+with open(RESULTS) as fin, open(OUTPUT, "w") as fout:
     for line in fin:
-        item = json.loads(line)
+        r = json.loads(line)
+
+        if not r.get("correct"):
+            continue
+
+        item = questions[r["id"]]
 
         if item.get("options"):
             labels = [chr(65 + i) for i in range(len(item["options"]))]
@@ -22,11 +27,21 @@ with open(INPUT) as fin, open(OUTPUT, "w") as fout:
 
         row = {
             "messages": [
-                {"role": "system", "content": "You are an expert mathematician. Solve carefully and put the final answer inside \\boxed{}."},
-                {"role": "user", "content": prompt},
-                {"role": "assistant", "content": make_target(item)},
+                {
+                    "role": "system",
+                    "content": "You are an expert mathematician. Solve carefully and put the final answer inside \\boxed{}."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                },
+                {
+                    "role": "assistant",
+                    "content": r["response"]
+                }
             ]
         }
+
         fout.write(json.dumps(row) + "\n")
 
 print("saved", OUTPUT)

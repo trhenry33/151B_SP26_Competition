@@ -39,15 +39,14 @@ model = AutoModelForCausalLM.from_pretrained(
 
 )
 
-dataset = load_dataset("json", data_files="data/sft_train.jsonl", split="train")
-
+dataset = load_dataset("json", data_files="data/sft_train_good_outputs.jsonl", split="train")
 peft_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
-    lora_dropout=0.05,
+    r=8,
+    lora_alpha=16,
+    lora_dropout=0.1,
     bias="none",
     task_type="CAUSAL_LM",
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    target_modules=["q_proj", "v_proj", "o_proj"],
 )
 
 training_args = SFTConfig(
