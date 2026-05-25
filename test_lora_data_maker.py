@@ -163,7 +163,7 @@ judger = Judger(strict_extract=False)
 
 pending_results = []
 
-for idx in tqdm(range(start_idx, len(data))):
+for idx in tqdm(range(start_idx, 200)):
 
     item = data[idx]
 
