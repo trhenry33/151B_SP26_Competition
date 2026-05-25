@@ -52,15 +52,15 @@ peft_config = LoraConfig(
 
 training_args = SFTConfig(
     output_dir="qwen_math_lora",
-    num_train_epochs=3,
+    num_train_epochs=1,
     per_device_train_batch_size=1,
-    gradient_accumulation_steps=8,
+    gradient_accumulation_steps=4,
     learning_rate=2e-4,
-    logging_steps=5,
+    logging_steps=1,
     save_steps=25,
-    max_length=4096,
+    max_length=2048,
     packing=False,
-    fp16=True,
+    fp16=False,
     bf16=False,
     max_grad_norm=0.0,
 )
@@ -72,6 +72,7 @@ trainer = SFTTrainer(
     peft_config=peft_config,
     formatting_func=formatting_func,
 )
-
+model.config.torch_dtype = torch.float16
+model.gradient_checkpointing_enable()
 trainer.train()
 trainer.save_model("qwen_math_lora")
