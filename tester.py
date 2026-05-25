@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/fewshot_examples_16384_tokens_100_freeresponse_update_again.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_fullrun.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -54,11 +54,11 @@ print(json.dumps(free_sample, indent=2))
 #prompt
 
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve the problem carefully but concisely. "
-    "Use the <think> section for brief reasoning, then output ONLY the final answer inside a single \\boxed{}. "
-    "The boxed answer must be the very last line and contain no extra words. "
-    "If there are multiple blanks or sub-answers, put them in order and separate them with commas inside one \\boxed{}. "
-    "Prefer exact symbolic answers when possible; use decimals only when the problem asks for them or exact form is impossible."
+    "You are an expert mathematician. Solve the problem step-by-step. "
+    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
+    "Put your final answer inside \\boxed{}. "
+    "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
+    "e.g. \\boxed{3, 7}."
 )
 
 SYSTEM_PROMPT_MCQ = (
@@ -80,32 +80,11 @@ Problem: Compute 6 * 7.
 \\boxed{42}
 
 Example 2
-Problem: If x = 145, find the temperature in Celsius, Kelvin, and Rankine.
+Problem: Simplify 12/16.
 <think>
-Use the conversion formulas and keep the answers in order as exact values.
+Divide numerator and denominator by 4 to get 3/4.
 </think>
-\boxed{62.7777777777778, 335.927777777778, 604.67}
-
-Example 3
-Problem: Solve tan(\theta) = 4.76 for the principal value and period.
-<think>
-The principal value is arctan(4.76) and tangent has period pi.
-</think>
-\boxed{atan(4.76), pi}
-
-Example 4
-Problem: A model has two blanks: f(3) = [ANS] and f(-3) = [ANS]. If f(x)=4x^2+x+2, find both answers.
-<think>
-Evaluate each blank in order and keep the answers comma-separated.
-</think>
-\boxed{41, 35}
-
-Example 5
-Problem: Find the exact half-life expression for a substance decaying by 3.416% each day.
-<think>
-Set (0.96584)^t = 1/2 and solve for t exactly.
-</think>
-\boxed{[ln(0.5)]/[ln(0.96584)]}
+\boxed{\frac{3}{4}}
 
 Now solve the next problem in the same format.
 """
@@ -140,24 +119,6 @@ Now solve the next problem in the same format.
 
 def build_few_shot_block(options: Optional[list]) -> str:
     return FEWSHOT_MCQ if options else FEWSHOT_MATH
-
-
-def build_sampling_params(options: Optional[list]) -> SamplingParams:
-    if options:
-        return SamplingParams(
-            max_tokens=MAX_TOKENS,
-            temperature=0.6,
-            top_p=0.95,
-            top_k=20,
-            repetition_penalty=1.0,
-        )
-    return SamplingParams(
-        max_tokens=4096,
-        temperature=0.2,
-        top_p=0.9,
-        top_k=10,
-        repetition_penalty=1.03,
-    )
 
 
 def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
@@ -207,7 +168,6 @@ sampling_params = SamplingParams(
 
 SAVE_EVAL = True
 BATCH_SIZE = 5
-RUN_LIMIT = 100
 
 out_path = Path(OUTPUT_PATH)
 out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -220,8 +180,8 @@ if count_path.exists():
 else:
     start_idx = 0
 
-run_end_idx = min(len(data), RUN_LIMIT)
-print(f"Starting run at index {start_idx}; ending before {run_end_idx} (limit {RUN_LIMIT} items)", flush=True)
+run_end_idx = len(data)
+print(f"Starting full run at index {start_idx}; ending before {run_end_idx}", flush=True)
 
 # -------- SCORING HELPERS --------
 
@@ -256,8 +216,7 @@ for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
         flush=True,
     )
 
-    options = item.get("options")
-    system, user = build_prompt(item["question"], options)
+    system, user = build_prompt(item["question"], item.get("options"))
     prompt_text = tokenizer.apply_chat_template(
         [
             {"role": "system", "content": system},
@@ -267,8 +226,7 @@ for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
         add_generation_prompt=True,
     )
 
-    run_sampling_params = sampling_params if options else build_sampling_params(options)
-    output = llm.generate([prompt_text], sampling_params=run_sampling_params)
+    output = llm.generate([prompt_text], sampling_params=sampling_params)
     response = output[0].outputs[0].text.strip()
     print(f"[{item_num}/{total_items}] Response preview: {response[:120].replace(chr(10), ' ')}", flush=True)
 
