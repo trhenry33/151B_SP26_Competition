@@ -182,7 +182,7 @@ if count_path.exists():
 else:
     start_idx = 0
 
-run_end_idx = min(len(data), start_idx + RUN_LIMIT)
+run_end_idx = min(len(data), RUN_LIMIT)
 print(f"Starting run at index {start_idx}; ending before {run_end_idx} (limit {RUN_LIMIT} items)", flush=True)
 
 # -------- SCORING HELPERS --------
