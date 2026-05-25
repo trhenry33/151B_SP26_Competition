@@ -35,6 +35,8 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,
     quantization_config=bnb_config,
     device_map="auto",
+    torch_dtype=torch.float16,
+
 )
 
 dataset = load_dataset("json", data_files="data/sft_train.jsonl", split="train")
@@ -60,7 +62,7 @@ training_args = SFTConfig(
     packing=False,
     fp16=True,
     bf16=False,
-    max_grad_norm=0.3,
+    max_grad_norm=0.0,
 )
 
 trainer = SFTTrainer(
