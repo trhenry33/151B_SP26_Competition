@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/fewshot_examples_16384_tokens_100.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_16384_tokens_100_freeresponse_update.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -54,12 +54,11 @@ print(json.dumps(free_sample, indent=2))
 #prompt
 
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve the problem carefully and briefly. "
-    "Use the <think> section for working, then give the final answer only inside a single \\boxed{}. "
-    "The boxed answer must be the last line and must contain no extra words. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. "
-    "If the problem has multiple sub-answers, separate them by commas inside one \\boxed{}, "
-    "e.g. \\boxed{3, 7}."
+    "You are an expert mathematician. Solve the problem carefully but concisely. "
+    "Use the <think> section for brief reasoning, then output ONLY the final answer inside a single \\boxed{}. "
+    "The boxed answer must be the very last line and contain no extra words. "
+    "If there are multiple blanks or sub-answers, put them in order and separate them with commas inside one \\boxed{}. "
+    "Prefer exact symbolic answers when possible; use decimals only when the problem asks for them or exact form is impossible."
 )
 
 SYSTEM_PROMPT_MCQ = (
@@ -81,11 +80,18 @@ Problem: Compute 6 * 7.
 \\boxed{42}
 
 Example 2
-Problem: Simplify 12/16.
+Problem: If x = 145, find the temperature in Celsius and Kelvin.
 <think>
-Divide numerator and denominator by 4 to get 3/4.
+Use the conversion formulas and keep the answers in order.
 </think>
-\\boxed{\\frac{3}{4}}
+\boxed{62.7777777777778, 335.927777777778}
+
+Example 3
+Problem: Solve tan(\theta) = 4.76 for the principal value and period.
+<think>
+The principal value is arctan(4.76) and tangent has period pi.
+</think>
+\boxed{atan(4.76), pi}
 
 Now solve the next problem in the same format.
 """
@@ -120,6 +126,24 @@ Now solve the next problem in the same format.
 
 def build_few_shot_block(options: Optional[list]) -> str:
     return FEWSHOT_MCQ if options else FEWSHOT_MATH
+
+
+def build_sampling_params(options: Optional[list]) -> SamplingParams:
+    if options:
+        return SamplingParams(
+            max_tokens=MAX_TOKENS,
+            temperature=0.6,
+            top_p=0.95,
+            top_k=20,
+            repetition_penalty=1.0,
+        )
+    return SamplingParams(
+        max_tokens=4096,
+        temperature=0.2,
+        top_p=0.9,
+        top_k=10,
+        repetition_penalty=1.03,
+    )
 
 
 def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
@@ -218,7 +242,8 @@ for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
         flush=True,
     )
 
-    system, user = build_prompt(item["question"], item.get("options"))
+    options = item.get("options")
+    system, user = build_prompt(item["question"], options)
     prompt_text = tokenizer.apply_chat_template(
         [
             {"role": "system", "content": system},
@@ -228,7 +253,8 @@ for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
         add_generation_prompt=True,
     )
 
-    output = llm.generate([prompt_text], sampling_params=sampling_params)
+    run_sampling_params = sampling_params if options else build_sampling_params(options)
+    output = llm.generate([prompt_text], sampling_params=run_sampling_params)
     response = output[0].outputs[0].text.strip()
     print(f"[{item_num}/{total_items}] Response preview: {response[:120].replace(chr(10), ' ')}", flush=True)
 
