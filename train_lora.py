@@ -14,7 +14,6 @@ MODEL_ID = "models/qwen3-4b-thinking"
 tokenizer = AutoTokenizer.from_pretrained(
     MODEL_ID,
     trust_remote_code=True,
-    local_files_only=True,
 )
 tokenizer.pad_token = tokenizer.eos_token
 
@@ -36,7 +35,6 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,
     quantization_config=bnb_config,
     device_map="auto",
-    local_files_only=True,
 )
 
 dataset = load_dataset("json", data_files="data/sft_train.jsonl", split="train")
