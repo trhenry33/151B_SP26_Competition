@@ -59,6 +59,8 @@ training_args = SFTConfig(
     max_length=4096,
     packing=False,
     fp16=True,
+    bf16=False,
+    max_grad_norm=0.3,
 )
 
 trainer = SFTTrainer(
