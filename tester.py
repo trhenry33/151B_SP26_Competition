@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/fewshot_examples_16384_tokens_100_freeresponse_update.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_16384_tokens_100_freeresponse_update_again.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -80,11 +80,11 @@ Problem: Compute 6 * 7.
 \\boxed{42}
 
 Example 2
-Problem: If x = 145, find the temperature in Celsius and Kelvin.
+Problem: If x = 145, find the temperature in Celsius, Kelvin, and Rankine.
 <think>
-Use the conversion formulas and keep the answers in order.
+Use the conversion formulas and keep the answers in order as exact values.
 </think>
-\boxed{62.7777777777778, 335.927777777778}
+\boxed{62.7777777777778, 335.927777777778, 604.67}
 
 Example 3
 Problem: Solve tan(\theta) = 4.76 for the principal value and period.
@@ -92,6 +92,20 @@ Problem: Solve tan(\theta) = 4.76 for the principal value and period.
 The principal value is arctan(4.76) and tangent has period pi.
 </think>
 \boxed{atan(4.76), pi}
+
+Example 4
+Problem: A model has two blanks: f(3) = [ANS] and f(-3) = [ANS]. If f(x)=4x^2+x+2, find both answers.
+<think>
+Evaluate each blank in order and keep the answers comma-separated.
+</think>
+\boxed{41, 35}
+
+Example 5
+Problem: Find the exact half-life expression for a substance decaying by 3.416% each day.
+<think>
+Set (0.96584)^t = 1/2 and solve for t exactly.
+</think>
+\boxed{[ln(0.5)]/[ln(0.96584)]}
 
 Now solve the next problem in the same format.
 """
