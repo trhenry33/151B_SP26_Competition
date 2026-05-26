@@ -210,7 +210,7 @@ sampling_params = SamplingParams(
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
 
-SAVE_EVAL = FALSE
+SAVE_EVAL = False
 BATCH_SIZE = 5
 
 out_path = Path(OUTPUT_PATH)
