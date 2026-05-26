@@ -14,7 +14,7 @@ print("imports work")
 #self consistency is same
 #chain of thought is same
 #fewshot with others : 55%
-#jsut fewshot: 65%
+#jsut fewshot: 65% - entire: 57.82%
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
@@ -250,7 +250,7 @@ pending_results = []
 # testing: use "start_idx, end_idx" 
 #end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, 200)):
+for idx in tqdm(range(start_idx, len(data))):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
