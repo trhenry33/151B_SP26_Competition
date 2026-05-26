@@ -27,8 +27,8 @@ from typing import Optional
 
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
-DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test_lora.jsonl"
+DATA_PATH   = "data/private.jsonl"
+OUTPUT_PATH = "results/lora_private.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -210,7 +210,7 @@ sampling_params = SamplingParams(
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
 
-SAVE_EVAL = True
+SAVE_EVAL = FALSE
 BATCH_SIZE = 5
 
 out_path = Path(OUTPUT_PATH)
@@ -279,8 +279,8 @@ for idx in tqdm(range(start_idx, 200)):
     # -------- SCORING --------
 
     is_mcq = bool(item.get("options"))
-    gold = item["answer"]
-    #gold = 1
+    #gold = item["answer"]
+    gold = 1
 
     r = {
         "id": item.get("id"),
