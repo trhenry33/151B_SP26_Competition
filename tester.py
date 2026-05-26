@@ -22,7 +22,7 @@ from typing import Optional
 
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
-DATA_PATH   = "data/public.jsonl"
+DATA_PATH   = "data/private.jsonl"
 OUTPUT_PATH = "results/fewshot_examples_fullrun.jsonl"
 
 
@@ -166,7 +166,7 @@ sampling_params = SamplingParams(
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
 
-SAVE_EVAL = True
+SAVE_EVAL = False
 BATCH_SIZE = 5
 
 out_path = Path(OUTPUT_PATH)
@@ -233,8 +233,8 @@ for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
     # -------- SCORING --------
 
     is_mcq = bool(item.get("options"))
-    gold = item["answer"]
-    #gold = 1
+    # gold = item["answer"]
+    gold = 1
 
     r = {
         "id": item.get("id"),
