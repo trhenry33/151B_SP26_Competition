@@ -23,7 +23,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/private.jsonl"
-OUTPUT_PATH = "results/fewshot_examples_fullrun.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_private_fullrun.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
