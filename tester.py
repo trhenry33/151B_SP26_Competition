@@ -252,7 +252,7 @@ pending_results = []
 # testing: use "start_idx, end_idx" 
 #end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, 20)):
+for idx in tqdm(range(start_idx, 100)):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
