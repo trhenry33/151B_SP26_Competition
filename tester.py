@@ -27,8 +27,8 @@ from typing import Optional
 
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
-DATA_PATH   = "data/private.jsonl"
-OUTPUT_PATH = "results/lora_private.jsonl"
+DATA_PATH   = "data/public.jsonl"
+OUTPUT_PATH = "results/extra_prompt_pub.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -79,21 +79,23 @@ print(json.dumps(free_sample, indent=2))
 # )
 
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve the problem carefully and briefly. "
-    "Use the <think> section for working, then give the final answer only inside a single \\boxed{}. "
-    "The boxed answer must be the last line and must contain no extra words. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. "
-    "If the problem has multiple sub-answers, separate them by commas inside one \\boxed{}, "
-    "e.g. \\boxed{3, 7}."
+    "You are an expert mathematician. Solve carefully but keep the work concise. "
+    "Do NOT write a second explanation after the thinking section. "
+    "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
+    "If the problem has multiple [ANS] blanks, count them and give answers in the same order, separated by commas. "
+    "If you are unsure or the problem is long, still make your best final answer instead of continuing indefinitely. "
+    "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{3, 7}."
 )
 
 SYSTEM_PROMPT_MCQ = (
-    "You are an expert mathematician. "
-    "Read the problem and the answer choices below, then select the single best answer. "
-    "Use the <think> section for a short justification, then output only the chosen letter inside a single \\boxed{}. "
-    "The boxed answer must be the last line and must contain no extra words. "
-    "Before finalizing, verify calculations, option matching, and formatting mistakes. "
-    "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
+    "You are an expert mathematician. Solve carefully but keep the work concise. "
+    "Compare your result against the answer choices before finalizing. "
+    "Do NOT write a second explanation after the thinking section. "
+    "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
+    "For a normal multiple-choice problem, output one letter only. "
+    "If the problem explicitly asks for multiple choices or multiple blanks, output the letters in order separated by commas. "
+    "If you are unsure, choose the best matching option instead of continuing indefinitely. "
+    "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{C}."
 )
 
 
@@ -192,11 +194,12 @@ tokenizer = AutoTokenizer.from_pretrained(
 
 llm = LLM(
     model=MODEL_ID,
-    enable_lora=True,
-    max_lora_rank=16,
+    quantization="bitsandbytes",
+    load_format="bitsandbytes",
     trust_remote_code=True,
     gpu_memory_utilization=0.9,
     max_model_len=8192,
+    max_num_seqs=1,
 )
 MAX_TOKENS = 8192
 sampling_params = SamplingParams(
@@ -210,14 +213,13 @@ sampling_params = SamplingParams(
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
 
-SAVE_EVAL = False
+SAVE_EVAL = True
 BATCH_SIZE = 5
 
 out_path = Path(OUTPUT_PATH)
 out_path.parent.mkdir(parents=True, exist_ok=True)
 
-count_path = out_path.parent / "count.txt"
-
+count_path = out_path.with_suffix(".count.txt")
 # Resume point
 if count_path.exists():
     start_idx = int(count_path.read_text().strip())
@@ -250,7 +252,7 @@ pending_results = []
 # testing: use "start_idx, end_idx" 
 #end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, len(data))):
+for idx in tqdm(range(start_idx, 20)):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
@@ -263,24 +265,18 @@ for idx in tqdm(range(start_idx, len(data))):
         add_generation_prompt=True,
     )
 
-    from vllm.lora.request import LoRARequest
 
     outputs = llm.generate(
-        [prompt_text],
-        sampling_params=sampling_params,
-        lora_request=LoRARequest(
-            "math_adapter",
-            1,
-            "qwen_math_lora"
-        )
+    [prompt_text],
+    sampling_params=sampling_params,
     )
     response = outputs[0].outputs[0].text.strip()
 
     # -------- SCORING --------
 
     is_mcq = bool(item.get("options"))
-    #gold = item["answer"]
-    gold = 1
+    gold = item["answer"]
+    #gold = 1
 
     r = {
         "id": item.get("id"),

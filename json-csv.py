@@ -1,8 +1,8 @@
 import json
 import csv
 
-INPUT_JSONL = "results/starter_result_copy.jsonl"   # change if needed
-OUTPUT_CSV = "submission.csv"
+INPUT_JSONL = "lora_private.jsonl"   # change if needed
+OUTPUT_CSV = "submission_lora.csv"
 
 rows = []
 
@@ -25,6 +25,6 @@ print(f"Saved {len(rows)} rows to {OUTPUT_CSV}")
 
 import pandas as pd
 
-df = pd.read_csv("submission.csv")
+df = pd.read_csv("submission_lora.csv")
 print(df.head())
 print(len(df))
