@@ -78,24 +78,41 @@ print(json.dumps(free_sample, indent=2))
 #     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
 # )
 
+# SYSTEM_PROMPT_MATH = (
+#     "You are an expert mathematician. Solve carefully but keep the work concise. "
+#     "Do NOT write a second explanation after the thinking section. "
+#     "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
+#     "If the problem has multiple [ANS] blanks, count them and give answers in the same order, separated by commas. "
+#     "If you are unsure or the problem is long, still make your best final answer instead of continuing indefinitely. "
+#     "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{3, 7}."
+# )
+
+# SYSTEM_PROMPT_MCQ = (
+#     "You are an expert mathematician. Solve carefully but keep the work concise. "
+#     "Compare your result against the answer choices before finalizing. "
+#     "Do NOT write a second explanation after the thinking section. "
+#     "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
+#     "For a normal multiple-choice problem, output one letter only. "
+#     "If the problem explicitly asks for multiple choices or multiple blanks, output the letters in order separated by commas. "
+#     "If you are unsure, choose the best matching option instead of continuing indefinitely. "
+#     "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{C}."
+# )
+
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve carefully but keep the work concise. "
-    "Do NOT write a second explanation after the thinking section. "
-    "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
-    "If the problem has multiple [ANS] blanks, count them and give answers in the same order, separated by commas. "
-    "If you are unsure or the problem is long, still make your best final answer instead of continuing indefinitely. "
-    "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{3, 7}."
+    "You are an expert mathematician. Solve carefully. "
+    "Preserve the requested answer form: if the expected answer is symbolic, give symbolic form; "
+    "if decimals are requested, give enough precision and do not over-round. "
+    "If the problem has multiple [ANS] blanks, count every blank and answer all of them in order. "
+    "Do not box intermediate values. Use \\boxed{} exactly once, on the final line only. "
+    "The final line must contain only the boxed answer, with multiple answers separated by commas."
 )
 
 SYSTEM_PROMPT_MCQ = (
-    "You are an expert mathematician. Solve carefully but keep the work concise. "
-    "Compare your result against the answer choices before finalizing. "
-    "Do NOT write a second explanation after the thinking section. "
-    "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
-    "For a normal multiple-choice problem, output one letter only. "
-    "If the problem explicitly asks for multiple choices or multiple blanks, output the letters in order separated by commas. "
-    "If you are unsure, choose the best matching option instead of continuing indefinitely. "
-    "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{C}."
+    "You are an expert mathematician. Solve carefully and choose the best listed option. "
+    "For MCQ, even if your computed answer seems not listed, choose the option that matches the expected course convention. "
+    "Do not decide that the problem is wrong unless no option is mathematically plausible. "
+    "Do not box intermediate values. Use \\boxed{} exactly once, on the final line only. "
+    "The final line must contain only the boxed letter."
 )
 
 
@@ -115,6 +132,20 @@ FEWSHOT_MATH = """
         Divide numerator and denominator by 4 to get 3/4.
         </think>
         \\boxed{\\frac{3}{4}}
+
+        Example 3
+        Problem: Give the exact fraction remaining after 36 years if the half-life is 31 years. [ANS]
+        <think>
+        This is exponential decay. The exact fraction remaining is (1/2)^(36/31). Since exact form is requested, do not convert to decimal.
+        </think>
+        \boxed{(1/2)^{36/31}}
+
+        Example 4
+        Problem: Fill the table values: x values [ANS], x^2 values [ANS], sum [ANS], average [ANS], square root [ANS]
+        <think>
+        There are five blanks, so every requested table entry must be included in order.
+        </think>
+        \boxed{-10, 100, -9, 81, 304, 60.8, 7.797}
 
         Now solve the next problem in the same format.
         """
@@ -144,6 +175,8 @@ FEWSHOT_MCQ = """
         The next integer after 8 is 9, so option B is correct.
         </think>
         \\boxed{B}
+
+    
 
         Now solve the next problem in the same format.
 """
