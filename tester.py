@@ -28,7 +28,7 @@ from typing import Optional
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
 DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/extra_prompt2_pub.jsonl"
+OUTPUT_PATH = "results/extra_prompt3_pub.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -287,7 +287,7 @@ pending_results = []
 # testing: use "start_idx, end_idx" 
 #end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
 
-for idx in tqdm(range(start_idx, 100)):
+for idx in tqdm(range(start_idx, 20)):
     item = data[idx]
 
     system, user = build_prompt(item["question"], item.get("options"))
