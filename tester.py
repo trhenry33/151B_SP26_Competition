@@ -99,18 +99,20 @@ print(json.dumps(free_sample, indent=2))
 # )
 
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve carefully. "
-    "Preserve the requested answer form: if the expected answer is symbolic, give symbolic form; "
-    "if decimals are requested, give enough precision and do not over-round. "
+    "You are an expert mathematician taking a timed exam. Solve directly and carefully. "
+    "Do not ramble, debate interpretations, or write a second solution after finishing. "
+    "Preserve the requested answer form. Prefer exact symbolic answers when natural, such as fractions, radicals, powers, or pi expressions. "
+    "For numerical answers, keep high precision: use at least 8 significant digits when possible and do not round unless the problem explicitly asks. "
     "If the problem has multiple [ANS] blanks, count every blank and answer all of them in order. "
     "Do not box intermediate values. Use \\boxed{} exactly once, on the final line only. "
     "The final line must contain only the boxed answer, with multiple answers separated by commas."
 )
 
 SYSTEM_PROMPT_MCQ = (
-    "You are an expert mathematician. Solve carefully and choose the best listed option. "
-    "For MCQ, even if your computed answer seems not listed, choose the option that matches the expected course convention. "
-    "Do not decide that the problem is wrong unless no option is mathematically plausible. "
+    "You are an expert mathematician taking a timed multiple-choice exam. Solve directly and carefully. "
+    "Compute the answer, match it to the listed options, then stop. "
+    "Do not ramble, debate interpretations, or spend time arguing that the problem/options are wrong. "
+    "Even if your computed answer seems unusual, choose the best listed option using the expected course convention. "
     "Do not box intermediate values. Use \\boxed{} exactly once, on the final line only. "
     "The final line must contain only the boxed letter."
 )
