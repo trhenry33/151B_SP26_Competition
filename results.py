@@ -1,5 +1,5 @@
 
-OUTPUT_PATH = "results/starter_results.jsonl"
+OUTPUT_PATH = "results/extra_prompt2_pub.jsonl"
 import json
 
 
