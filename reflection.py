@@ -261,7 +261,7 @@ if count_path.exists():
 else:
     start_idx = 0
 
-run_end_idx = min(20, len(data))
+run_end_idx = 100
 print(f"Starting reflection run at index {start_idx}; ending before {run_end_idx}", flush=True)
 
 
