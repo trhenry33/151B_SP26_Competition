@@ -22,8 +22,8 @@ from typing import Optional
 
 MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"
-DATA_PATH   = "data/public.jsonl"
-OUTPUT_PATH = "results/starter_results_test_reflection_20.jsonl"
+DATA_PATH   = "data/private.jsonl"
+OUTPUT_PATH = "results/fewshot_examples_private_fullrun.jsonl"
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
@@ -64,9 +64,61 @@ SYSTEM_PROMPT_MATH = (
 SYSTEM_PROMPT_MCQ = (
     "You are an expert mathematician. "
     "Read the problem and the answer choices below, then select the single best answer. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
+    "Use the <think> section for a short justification, then output only the chosen letter inside a single \\boxed{}. "
+    "The boxed answer must be the last line and must contain no extra words. "
+    "Before finalizing, verify calculations, option matching, and formatting mistakes. "
     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
 )
+
+FEWSHOT_MATH = """Here are solved examples of the required answer style.
+
+Example 1
+Problem: Compute 6 * 7.
+<think>
+6 * 7 = 42.
+</think>
+\\boxed{42}
+
+Example 2
+Problem: Simplify 12/16.
+<think>
+Divide numerator and denominator by 4 to get 3/4.
+</think>
+\boxed{\frac{3}{4}}
+
+Now solve the next problem in the same format.
+"""
+
+FEWSHOT_MCQ = """Here are solved examples of the required answer style.
+
+Example 1
+Problem: Which option equals 9 - 4?
+Options:
+A. 3
+B. 5
+C. 7
+<think>
+9 - 4 = 5, so option B is correct.
+</think>
+\\boxed{B}
+
+Example 2
+Problem: Which option is the next number after 8?
+Options:
+A. 7
+B. 9
+C. 10
+<think>
+The next integer after 8 is 9, so option B is correct.
+</think>
+\\boxed{B}
+
+Now solve the next problem in the same format.
+"""
+
+
+def build_few_shot_block(options: Optional[list]) -> str:
+    return FEWSHOT_MCQ if options else FEWSHOT_MATH
 
 
 def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
@@ -74,8 +126,10 @@ def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
     if options:
         labels    = [chr(65 + i) for i in range(len(options))]
         opts_text = "\n".join(f"{lbl}. {opt.strip()}" for lbl, opt in zip(labels, options))
-        return SYSTEM_PROMPT_MCQ, f"{question}\n\nOptions:\n{opts_text}"
-    return SYSTEM_PROMPT_MATH, question
+        user_prompt = f"{build_few_shot_block(options)}\n\nQuestion:\n{question}\n\nOptions:\n{opts_text}"
+        return SYSTEM_PROMPT_MCQ, user_prompt
+    user_prompt = f"{build_few_shot_block(options)}\n\nQuestion:\n{question}"
+    return SYSTEM_PROMPT_MATH, user_prompt
 
 
 # Verify with samples
@@ -88,14 +142,14 @@ for label, item in [("MCQ", mcq_sample), ("Free-form", free_sample)]:
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
 
-MAX_TOKENS = 8192   # start big
+MAX_TOKENS = 16384   # doubled generation budget
 
 llm = LLM(
     model=MODEL_ID,
     quantization="bitsandbytes",
     load_format="bitsandbytes",
     gpu_memory_utilization=0.9,   # lower this
-    max_model_len=12288,            # critical
+    max_model_len=24576,            # allow longer prompts + doubled generation
     trust_remote_code=True,
     max_num_seqs=1,
     max_num_batched_tokens=4096,
@@ -112,13 +166,13 @@ sampling_params = SamplingParams(
 
 # -------- GENERATE + SCORE + SAVE (CRASH SAFE) --------
 
-SAVE_EVAL = True
+SAVE_EVAL = False
 BATCH_SIZE = 5
 
 out_path = Path(OUTPUT_PATH)
 out_path.parent.mkdir(parents=True, exist_ok=True)
 
-count_path = out_path.parent / "count.txt"
+count_path = out_path.parent / f"{out_path.stem}_count.txt"
 
 # Resume point
 if count_path.exists():
@@ -126,7 +180,8 @@ if count_path.exists():
 else:
     start_idx = 0
 
-print(f"Starting from index {start_idx}")
+run_end_idx = len(data)
+print(f"Starting full run at index {start_idx}; ending before {run_end_idx}", flush=True)
 
 # -------- SCORING HELPERS --------
 
@@ -148,12 +203,18 @@ judger = Judger(strict_extract=False)
 
 pending_results = []
 
-# for full run use: range(start_idx, len(data))
-# testing: use "start_idx, end_idx" 
-#end_idx = min(len(data), start_idx+20)  # REMOVE +20 later
+if start_idx >= run_end_idx:
+    print("Run limit reached for this resume point; nothing to process.", flush=True)
 
-for idx in tqdm(range(start_idx, start_idx+20)):
+for idx in tqdm(range(start_idx, run_end_idx), desc="Generating", unit="item"):
     item = data[idx]
+    item_num = idx - start_idx + 1
+    total_items = max(run_end_idx - start_idx, 0)
+    print(
+        f"[{item_num}/{total_items}] Processing id={item.get('id')} "
+        f"({'MCQ' if item.get('options') else 'free-form'})",
+        flush=True,
+    )
 
     system, user = build_prompt(item["question"], item.get("options"))
     prompt_text = tokenizer.apply_chat_template(
@@ -167,12 +228,13 @@ for idx in tqdm(range(start_idx, start_idx+20)):
 
     output = llm.generate([prompt_text], sampling_params=sampling_params)
     response = output[0].outputs[0].text.strip()
+    print(f"[{item_num}/{total_items}] Response preview: {response[:120].replace(chr(10), ' ')}", flush=True)
 
     # -------- SCORING --------
 
     is_mcq = bool(item.get("options"))
-    gold = item["answer"]
-    #gold = 1
+    # gold = item["answer"]
+    gold = 1
 
     r = {
         "id": item.get("id"),
@@ -201,7 +263,7 @@ for idx in tqdm(range(start_idx, start_idx+20)):
 
     # -------- SAVE EVERY BATCH --------
 
-    if len(pending_results) == BATCH_SIZE or idx == len(data) - 1:
+    if len(pending_results) == BATCH_SIZE or idx == run_end_idx - 1:
         with open(out_path, "a") as f:
             for r in pending_results:
                 if SAVE_EVAL:
@@ -224,7 +286,7 @@ for idx in tqdm(range(start_idx, start_idx+20)):
         saved_count = idx + 1
         count_path.write_text(str(saved_count))
 
-        print(f"Saved through item {saved_count}")
+        print(f"Saved through item {saved_count}; batch size {len(pending_results)}", flush=True)
         pending_results = []
 
 
@@ -232,7 +294,7 @@ for idx in tqdm(range(start_idx, start_idx+20)):
 #score
 
 results = [json.loads(line) for line in open(OUTPUT_PATH)]
-print(f"Scoring complete. {len(results)} results.")
+print(f"Scoring complete. {len(results)} results.", flush=True)
 
 mcq_res  = [r for r in results if r["is_mcq"]]
 free_res = [r for r in results if not r["is_mcq"]]

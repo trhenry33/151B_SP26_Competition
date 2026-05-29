@@ -1,0 +1,8 @@
+vllm==0.19.1
+transformers>=4.30.0
+tqdm
+numpy
+torch
+accelerate
+bitsandbytes
+peft

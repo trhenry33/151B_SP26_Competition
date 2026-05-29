@@ -1,0 +1,1076 @@
+378	Okay, let's try to solve this problem step by step. First, I need to recall what each of these terms means. SST is the total sum of squares, which measures the total variation in the response variable (games won here). SSR is the regression sum of squares, which is the variation explained by the regression model. SSE is the error sum of squares, the unexplained variation. The coefficient of determination is R², which is SSR/SST, and it tells the percentage of variation explained by the regression.
+
+Wait, but the problem says "games won as the independent variable x". Wait, hold on. Wait, in the table, the batting average is the dependent variable? Wait, no, the problem says: "games won as the independent variable x". Wait, no, let me check again.
+
+Wait, the problem states: "Using games won as the independent variable x". Wait, that seems confusing. Wait, in the table, the columns are Team, Games Won, Batting Average. So the problem says: "Using games won as the independent variable x". Hmm, that would mean that x is games won, and y is batting average? Wait, but typically, in regression, the independent variable is the predictor, and the response variable is the outcome. So if they say "games won as the independent variable x", then x = games won, and y = batting average? But the question is about the relation between the number of games won and the batting average. So maybe it's the other way around. Wait, the problem says: "the number of games won by a major league baseball team in a season related to the team batting average". So the question is: is games won related to batting average? So probably, we need to model batting average as the response variable (y) and games won as the predictor (x). Wait, but the problem says "using games won as the independent variable x", so x is games won, and y is batting average. Wait, but that's a bit counterintuitive because usually, batting average is a performance metric, and games won is the outcome. But the problem states it this way, so we have to follow.
+
+Wait, let's check the problem statement again: "Using games won as the independent variable x". So x is games won, y is batting average. So we need to do a regression where y (batting average) is predicted by x (games won). But that seems odd because batting average is a per-game statistic, but maybe in this context, it's okay.
+
+Wait, but let's make sure. Let's list the data:
+
+Team | Games Won (x) | Batting Average (y)
+1 | 105 | 0.277
+2 | 97 | 0.281
+3 | 78 | 0.269
+4 | 94 | 0.276
+5 | 82 | 0.274
+6 | 99 | 0.267
+7 | 90 | 0.272
+8 | 84 | 0.272
+
+So x is games won (independent variable), y is batting average (response variable). So we need to compute the regression model where y is a function of x.
+
+First, let's compute the necessary sums for SST, SSR, SSE.
+
+First, let's list all x and y values.
+
+x (games won): [105, 97, 78, 94, 82, 99, 90, 84]
+y (batting average): [0.277, 0.281, 0.269, 0.276, 0.274, 0.267, 0.272, 0.272]
+
+First, let's compute the means.
+
+n = 8 teams.
+
+Compute the mean of x (x̄) and mean of y (ȳ).
+
+First, sum of x: 105 + 97 + 78 + 94 + 82 + 99 + 90 + 84
+
+Let's compute step by step:
+
+105 + 97 = 202
+
+202 + 78 = 280
+
+280 + 94 = 374
+
+374 + 82 = 456
+
+456 + 99 = 555
+
+555 + 90 = 645
+
+645 + 84 = 729
+
+So sum_x = 729. Then x̄ = 729 / 8 = 91.125
+
+Sum of y: 0.277 + 0.281 + 0.269 + 0.276 + 0.274 + 0.267 + 0.272 + 0.272
+
+Let's compute:
+
+0.277 + 0.281 = 0.558
+
+0.558 + 0.269 = 0.827
+
+0.827 + 0.276 = 1.103
+
+1.103 + 0.274 = 1.377
+
+1.377 + 0.267 = 1.644
+
+1.644 + 0.272 = 1.916
+
+1.916 + 0.272 = 2.188
+
+So sum_y = 2.188. Then ȳ = 2.188 / 8 = 0.2735
+
+Wait, let's check sum_y again:
+
+0.277
+
++0.281 → 0.558
+
++0.269 → 0.827
+
++0.276 → 1.103
+
++0.274 → 1.377
+
++0.267 → 1.644
+
++0.272 → 1.916
+
++0.272 → 2.188. Yes, that's correct. So ȳ = 2.188 / 8 = 0.2735
+
+Now, SST (Total Sum of Squares) is sum[(y_i - ȳ)^2] for i=1 to n.
+
+SSR (Regression Sum of Squares) is sum[(ŷ_i - ȳ)^2], where ŷ_i is the predicted value from the regression line.
+
+SSE (Error Sum of Squares) is sum[(y_i - ŷ_i)^2], which is also equal to SST - SSR.
+
+The coefficient of determination R² is SSR / SST, which is the proportion of variation in y explained by x.
+
+So first, we need to compute the regression line. Since it's a simple linear regression, we need to compute the slope and intercept.
+
+But maybe we don't need to compute the actual regression line, but let's see.
+
+Wait, but to compute SSR, we need the regression coefficients.
+
+Let me recall the formulas.
+
+First, compute the necessary sums:
+
+sum_x = 729, sum_y = 2.188, sum_xy = sum of x_i * y_i, sum_x² = sum of x_i², sum_y² = sum of y_i²
+
+Let's compute sum_xy:
+
+x1=105, y1=0.277 → 105*0.277 = 29.085
+
+x2=97, y2=0.281 → 97*0.281 = let's compute 97*0.28 = 27.16, 97*0.001=0.097, so 27.16 + 0.097 = 27.257? Wait, 0.281 = 0.28 + 0.001, so 97*0.28 = 27.16, 97*0.001=0.097, so total 27.16 + 0.097 = 27.257. Let me check with calculator: 97 * 0.281 = 97 * (0.2 + 0.08 + 0.001) = 19.4 + 7.76 + 0.097 = 19.4 + 7.76 is 27.16, plus 0.097 is 27.257. Correct.
+
+x3=78, y3=0.269 → 78*0.269. Let's compute 78*0.2 = 15.6, 78*0.06 = 4.68, 78*0.009 = 0.702. So 15.6 + 4.68 = 20.28 + 0.702 = 20.982
+
+x4=94, y4=0.276 → 94*0.276. Let's compute 90*0.276=24.84, 4*0.276=1.104, total 24.84 + 1.104 = 25.944
+
+x5=82, y5=0.274 → 82*0.274. 80*0.274=21.92, 2*0.274=0.548, total 21.92 + 0.548 = 22.468
+
+x6=99, y6=0.267 → 99*0.267. 100*0.267=26.7, minus 1*0.267=0.267 → 26.7 - 0.267 = 26.433
+
+x7=90, y7=0.272 → 90*0.272 = 24.48
+
+x8=84, y8=0.272 → 84*0.272. 80*0.272=21.76, 4*0.272=1.088, total 21.76 + 1.088 = 22.848
+
+Now let's list all the products:
+
+1: 29.085
+
+2: 27.257
+
+3: 20.982
+
+4: 25.944
+
+5: 22.468
+
+6: 26.433
+
+7: 24.48
+
+8: 22.848
+
+Now sum these up.
+
+Let's add step by step:
+
+Start with 0.
+
+29.085 + 27.257 = 56.342
+
+56.342 + 20.982 = 77.324
+
+77.324 + 25.944 = 103.268
+
+103.268 + 22.468 = 125.736
+
+125.736 + 26.433 = 152.169
+
+152.169 + 24.48 = 176.649
+
+176.649 + 22.848 = 199.497
+
+So sum_xy = 199.497
+
+Now sum_x²: sum of x_i squared.
+
+x1=105 → 105²=11025
+
+x2=97 → 97²=9409
+
+x3=78 → 78²=6084
+
+x4=94 → 94²=8836
+
+x5=82 → 82²=6724
+
+x6=99 → 99²=9801
+
+x7=90 → 90²=8100
+
+x8=84 → 84²=7056
+
+Let's compute each:
+
+105² = 11025
+
+97² = 9409 (90²=8100, 2*90*7=1260, 7²=49; 8100+1260+49=9409)
+
+78²=6084 (70²=4900, 2*70*8=1120, 8²=64; 4900+1120+64=6084)
+
+94²=8836 (90²=8100, 2*90*4=720, 4²=16; 8100+720+16=8836)
+
+82²=6724 (80²=6400, 2*80*2=320, 2²=4; 6400+320+4=6724)
+
+99²=9801 (100²=10000, minus 2*100*1 +1=10000 - 200 +1=9801)
+
+90²=8100
+
+84²=7056 (80²=6400, 2*80*4=640, 4²=16; 6400+640+16=7056)
+
+Now sum all these:
+
+11025 + 9409 = 20434
+
+20434 + 6084 = 26518
+
+26518 + 8836 = 35354
+
+35354 + 6724 = 42078
+
+42078 + 9801 = 51879
+
+51879 + 8100 = 59979
+
+59979 + 7056 = 67035
+
+So sum_x² = 67035
+
+sum_y²: sum of y_i squared.
+
+y1=0.277 → 0.277² = 0.076729
+
+y2=0.281 → 0.281² = 0.078961
+
+y3=0.269 → 0.269² = 0.072361
+
+y4=0.276 → 0.276² = 0.076176
+
+y5=0.274 → 0.274² = 0.075076
+
+y6=0.267 → 0.267² = 0.071289
+
+y7=0.272 → 0.272² = 0.073984
+
+y8=0.272 → 0.272² = 0.073984
+
+Let's compute each:
+
+0.277²: 0.27²=0.0729, 0.007²=0.000049, 2*0.27*0.007=0.00378. So (0.27 + 0.007)² = 0.0729 + 0.00378 + 0.000049 = 0.076729. Correct.
+
+0.281²: 0.28²=0.0784, 0.001²=0.000001, 2*0.28*0.001=0.00056. So (0.28 + 0.001)² = 0.0784 + 0.00056 + 0.000001 = 0.078961. Correct.
+
+0.269²: 0.26²=0.0676, 0.009²=0.000081, 2*0.26*0.009=0.00468. So (0.26 + 0.009)² = 0.0676 + 0.00468 + 0.000081 = 0.072361. Correct.
+
+0.276²: 0.27²=0.0729, 0.006²=0.000036, 2*0.27*0.006=0.00324. So (0.27 + 0.006)² = 0.0729 + 0.00324 + 0.000036 = 0.076176. Correct.
+
+0.274²: 0.27²=0.0729, 0.004²=0.000016, 2*0.27*0.004=0.00216. So (0.27 + 0.004)² = 0.0729 + 0.00216 + 0.000016 = 0.075076. Correct.
+
+0.267²: 0.26²=0.0676, 0.007²=0.000049, 2*0.26*0.007=0.00364. So (0.26 + 0.007)² = 0.0676 + 0.00364 + 0.000049 = 0.071289. Correct.
+
+0.272²: 0.27²=0.0729, 0.002²=0.000004, 2*0.27*0.002=0.00108. So (0.27 + 0.002)² = 0.0729 + 0.00108 + 0.000004 = 0.073984. Correct.
+
+Same for the last one, 0.272²=0.073984.
+
+Now sum these up:
+
+0.076729 + 0.078961 = 0.15569
+
+0.15569 + 0.072361 = 0.228051
+
+0.228051 + 0.076176 = 0.304227
+
+0.304227 + 0.075076 = 0.379303
+
+0.379303 + 0.071289 = 0.450592
+
+0.450592 + 0.073984 = 0.524576
+
+0.524576 + 0.073984 = 0.59856
+
+So sum_y² = 0.59856
+
+Now, let's compute SST (Total Sum of Squares). SST = sum[(y_i - ȳ)^2] = sum(y_i²) - n*(ȳ)^2
+
+We have sum_y² = 0.59856, n=8, ȳ=0.2735
+
+So ȳ² = (0.2735)^2. Let's compute that: 0.27²=0.0729, 0.0035²=0.00001225, 2*0.27*0.0035=0.00189. So (0.27 + 0.0035)^2 = 0.0729 + 0.00189 + 0.00001225 = 0.07480225
+
+So n*(ȳ)^2 = 8 * 0.07480225 = 0.598418
+
+Therefore, SST = 0.59856 - 0.598418 = 0.000142? Wait, that can't be right. Wait, no, wait: SST is sum(y_i - ȳ)^2, which is equal to sum(y_i²) - n*ȳ². So yes, that's correct.
+
+But let's check the sum_y². Let me verify the sum_y² again.
+
+Wait, the individual y_i squared:
+
+0.277² = 0.076729
+
+0.281² = 0.078961 → sum so far 0.15569
+
+0.269² = 0.072361 → total 0.228051
+
+0.276² = 0.076176 → total 0.304227
+
+0.274² = 0.075076 → total 0.379303
+
+0.267² = 0.071289 → total 0.450592
+
+0.272² = 0.073984 → total 0.524576
+
+0.272² = 0.073984 → total 0.59856
+
+Yes, sum_y² is 0.59856.
+
+n*ȳ² = 8*(0.2735)^2. Let's compute 0.2735^2:
+
+0.2735 * 0.2735
+
+Let's compute 2735 * 2735 first, then adjust decimals.
+
+2735^2 = (2700 + 35)^2 = 2700² + 2*2700*35 + 35² = 7,290,000 + 189,000 + 1,225 = 7,290,000 + 189,000 = 7,479,000 + 1,225 = 7,480,225
+
+So 0.2735^2 = (2735/10000)^2 = 7,480,225 / 100,000,000 = 0.07480225
+
+So n*ȳ² = 8 * 0.07480225 = 0.598418
+
+Thus, SST = 0.59856 - 0.598418 = 0.000142. Wait, that's a very small number. Is that possible?
+
+Wait, the batting averages are around 0.27, so the variance is small. Let's check with actual data.
+
+Alternatively, maybe I made a mistake in sum_y².
+
+Wait, let's compute the sum of (y_i - ȳ)^2 directly.
+
+ȳ = 0.2735
+
+Compute each (y_i - 0.2735)^2:
+
+1. y1=0.277 → 0.277 - 0.2735 = 0.0035 → (0.0035)^2 = 0.00001225
+
+2. y2=0.281 → 0.281 - 0.2735 = 0.0075 → (0.0075)^2 = 0.00005625
+
+3. y3=0.269 → 0.269 - 0.2735 = -0.0045 → (-0.0045)^2 = 0.00002025
+
+4. y4=0.276 → 0.276 - 0.2735 = 0.0025 → (0.0025)^2 = 0.00000625
+
+5. y5=0.274 → 0.274 - 0.2735 = 0.0005 → (0.0005)^2 = 0.00000025
+
+6. y6=0.267 → 0.267 - 0.2735 = -0.0065 → (-0.0065)^2 = 0.00004225
+
+7. y7=0.272 → 0.272 - 0.2735 = -0.0015 → (-0.0015)^2 = 0.00000225
+
+8. y8=0.272 → same as y7: 0.00000225
+
+Now sum these up:
+
+0.00001225 + 0.00005625 = 0.0000685
+
++0.00002025 → 0.00008875
+
++0.00000625 → 0.000095
+
++0.00000025 → 0.00009525
+
++0.00004225 → 0.0001375
+
++0.00000225 → 0.00013975
+
++0.00000225 → 0.000142
+
+So SST = 0.000142. That's correct. So that's the total sum of squares for y.
+
+But wait, the problem says "the number of games won by a major league baseball team in a season related to the team batting average". So if we're modeling y (batting average) as a function of x (games won), then SST is as above.
+
+But let's proceed.
+
+Next, we need to compute SSR. For that, we need the regression coefficients.
+
+In simple linear regression, the regression line is ŷ = a + b x, where b = [n sum_xy - sum_x sum_y] / [n sum_x² - (sum_x)^2]
+
+Let's compute b.
+
+First, compute numerator: n sum_xy - sum_x sum_y = 8*199.497 - 729*2.188
+
+Compute 8*199.497 = 1595.976
+
+sum_x sum_y = 729 * 2.188. Let's compute that.
+
+729 * 2 = 1458
+
+729 * 0.188 = 729 * 0.1 + 729 * 0.08 + 729 * 0.008
+
+= 72.9 + 58.32 + 5.832 = 72.9 + 58.32 = 131.22 + 5.832 = 137.052
+
+So total sum_x sum_y = 1458 + 137.052 = 1595.052
+
+Therefore, numerator = 1595.976 - 1595.052 = 0.924
+
+Denominator: n sum_x² - (sum_x)^2 = 8*67035 - (729)^2
+
+Compute 8*67035 = 536,280
+
+729^2: Let's compute 700^2=490000, 29^2=841, 2*700*29=40600. So (700 + 29)^2 = 490000 + 40600 + 841 = 531,441
+
+So denominator = 536,280 - 531,441 = 4,839
+
+Therefore, slope b = 0.924 / 4839 ≈ 0.000191
+
+Wait, that's a very small slope. Let's check the calculations.
+
+Wait, sum_x = 729, sum_y = 2.188, sum_xy = 199.497, sum_x²=67035
+
+n sum_xy = 8*199.497 = 1595.976
+
+sum_x sum_y = 729 * 2.188. Let's compute 729 * 2.188:
+
+2.188 * 700 = 1531.6
+
+2.188 * 29 = 2.188*30 - 2.188 = 65.64 - 2.188 = 63.452
+
+So total 1531.6 + 63.452 = 1595.052. Correct.
+
+So numerator = 1595.976 - 1595.052 = 0.924. Correct.
+
+Denominator: n sum_x² - (sum_x)^2 = 8*67035 - 729^2
+
+8*67035: 67035*8. Let's compute 60000*8=480000, 7035*8=56280, so total 480000 + 56280 = 536,280. Correct.
+
+729^2: 729*729. Let's compute 700*700=490000, 700*29=20300, 29*700=20300, 29*29=841. So (700+29)^2=700² + 2*700*29 + 29²=490000 + 40600 + 841=531,441. Correct.
+
+So denominator=536280 - 531441=4839. Correct.
+
+So b = 0.924 / 4839 ≈ 0.000191 (approximately 0.000191)
+
+Then the intercept a = ȳ - b x̄ = 0.2735 - (0.000191)(91.125) ≈ 0.2735 - 0.0174 ≈ 0.2561
+
+But maybe we don't need to compute a and the predicted values. Let's see.
+
+SSR is the sum of (ŷ_i - ȳ)^2. Alternatively, SSR = b² * (sum (x_i - x̄)^2). Because in simple linear regression, SSR = [sum (x_i - x̄)(y_i - ȳ)]² / [sum (x_i - x̄)^2]
+
+Wait, yes, the formula for SSR is [sum (x_i - x̄)(y_i - ȳ)]² / [sum (x_i - x̄)^2]
+
+But sum (x_i - x̄)(y_i - ȳ) is the covariance times n, but in terms of sums, it's equal to (sum_xy - n x̄ ȳ) = (sum_xy - sum_x sum_y / n) = (sum_xy - (sum_x sum_y)/n). Which is the numerator we had for b.
+
+Wait, actually, the regression sum of squares SSR = [ (sum (x_i - x̄)(y_i - ȳ) ) ]² / [sum (x_i - x̄)^2]
+
+But sum (x_i - x̄)(y_i - ȳ) = sum_xy - n x̄ ȳ = 199.497 - 8*(91.125)*(0.2735)
+
+Wait, x̄ = 729/8 = 91.125, ȳ=2.188/8=0.2735
+
+So n x̄ ȳ = 8 * 91.125 * 0.2735
+
+Compute 91.125 * 0.2735: Let's compute 90*0.2735=24.615, 1.125*0.2735≈0.307. So total ≈24.615 + 0.307=24.922. Then 8*24.922≈199.376
+
+So sum (x_i - x̄)(y_i - ȳ) = sum_xy - n x̄ ȳ ≈ 199.497 - 199.376 ≈ 0.121
+
+Wait, but earlier we had numerator for b as 0.924, which is n sum_xy - sum_x sum_y = 8*199.497 - 729*2.188 = 1595.976 - 1595.052 = 0.924. But sum (x_i - x̄)(y_i - ȳ) = [sum_xy - n x̄ ȳ] = [199.497 - 8*91.125*0.2735]
+
+Compute 8*91.125*0.2735 = 8 * (91.125 * 0.2735)
+
+91.125 * 0.2735: Let's compute 90*0.2735=24.615, 1.125*0.2735=0.307 (approx). So 24.615 + 0.307=24.922. 8*24.922=199.376
+
+So sum (x_i - x̄)(y_i - ȳ) = 199.497 - 199.376 = 0.121
+
+Therefore, SSR = (0.121)^2 / [sum (x_i - x̄)^2]
+
+sum (x_i - x̄)^2 = sum_x² - n x̄² = 67035 - 8*(91.125)^2
+
+Compute 91.125²: 91.125 * 91.125. Let's compute 90²=8100, 1.125²=1.265625, 2*90*1.125=202.5. So (90 + 1.125)^2 = 8100 + 202.5 + 1.265625 = 8303.765625
+
+Thus, n x̄² = 8 * 8303.765625 = 66430.125
+
+sum (x_i - x̄)^2 = 67035 - 66430.125 = 604.875
+
+So SSR = (0.121)^2 / 604.875 ≈ 0.014641 / 604.875 ≈ 0.0000242
+
+Wait, but let's compute more accurately.
+
+sum (x_i - x̄)(y_i - ȳ) = 0.121 (from above), but let's compute it exactly.
+
+sum (x_i - x̄)(y_i - ȳ) = sum_xy - n x̄ ȳ = 199.497 - (8 * 91.125 * 0.2735)
+
+Compute 91.125 * 0.2735:
+
+91.125 * 0.2 = 18.225
+
+91.125 * 0.07 = 6.37875
+
+91.125 * 0.0035 = 0.3189375
+
+So total 18.225 + 6.37875 = 24.60375 + 0.3189375 = 24.9226875
+
+Then 8 * 24.9226875 = 199.3815
+
+sum_xy = 199.497
+
+So sum (x_i - x̄)(y_i - ȳ) = 199.497 - 199.3815 = 0.1155
+
+So that's more precise.
+
+sum (x_i - x̄)^2 = 604.875 (as above)
+
+Thus, SSR = (0.1155)^2 / 604.875 = 0.01334025 / 604.875 ≈ 0.00002206
+
+So approximately 0.0000221
+
+SSE = SST - SSR = 0.000142 - 0.0000221 ≈ 0.0001199
+
+But let's check if this makes sense.
+
+Alternatively, maybe the problem is that the user intended x to be batting average and y to be games won, but the problem states: "Using games won as the independent variable x". So x is games won, y is batting average.
+
+But given the numbers, the regression is very weak, as the slope is tiny.
+
+But let's try to compute all values step by step.
+
+First, part (a) SST.
+
+We computed SST = sum(y_i - ȳ)^2 = 0.000142 (exactly 0.000142 as per the detailed sum)
+
+Part (b) SSR.
+
+SSR = [sum (x_i - x̄)(y_i - ȳ)]² / sum (x_i - x̄)^2
+
+sum (x_i - x̄)(y_i - ȳ) = 0.1155 (from above)
+
+sum (x_i - x̄)^2 = 604.875
+
+So SSR = (0.1155)^2 / 604.875 = (0.01334025) / 604.875 ≈ 0.00002206
+
+Part (c) SSE = SST - SSR ≈ 0.000142 - 0.00002206 ≈ 0.00011994
+
+Part (d) Coefficient of determination R² = SSR / SST ≈ 0.00002206 / 0.000142 ≈ 0.1553
+
+Part (e) What percent of variation is explained? R² * 100 ≈ 15.53%
+
+But let's verify these calculations with more precision.
+
+First, let's recompute sum (x_i - x̄)(y_i - ȳ) exactly.
+
+sum (x_i - x̄)(y_i - ȳ) = sum_xy - n x̄ ȳ
+
+sum_xy = 199.497 (from earlier calculation)
+
+n x̄ ȳ = 8 * (729/8) * (2.188/8) = (729 * 2.188) / 8
+
+Wait, sum_xy = 199.497, n x̄ ȳ = (sum_x / n) * (sum_y / n) * n = (sum_x sum_y)/n
+
+Yes, sum (x_i - x̄)(y_i - ȳ) = sum_xy - (sum_x sum_y)/n
+
+So (sum_x sum_y)/n = (729 * 2.188)/8 = 1595.052 / 8 = 199.3815
+
+So sum (x_i - x̄)(y_i - ȳ) = 199.497 - 199.3815 = 0.1155
+
+sum (x_i - x̄)^2 = sum_x² - n x̄² = 67035 - 8*(729/8)^2 = 67035 - (729²)/8
+
+729² = 531441, so 531441 / 8 = 66430.125
+
+sum (x_i - x̄)^2 = 67035 - 66430.125 = 604.875
+
+Thus, SSR = (0.1155)^2 / 604.875 = 0.01334025 / 604.875 ≈ 0.00002206
+
+SST = 0.000142 (exactly 0.000142 as per the sum of squares)
+
+So let's compute SST exactly:
+
+From the individual (y_i - ȳ)^2:
+
+1. 0.277 - 0.2735 = 0.0035 → 0.0035² = 0.00001225
+
+2. 0.281 - 0.2735 = 0.0075 → 0.0075² = 0.00005625
+
+3. 0.269 - 0.2735 = -0.0045 → (-0.0045)² = 0.00002025
+
+4. 0.276 - 0.2735 = 0.0025 → 0.0025² = 0.00000625
+
+5. 0.274 - 0.2735 = 0.0005 → 0.0005² = 0.00000025
+
+6. 0.267 - 0.2735 = -0.0065 → (-0.0065)² = 0.00004225
+
+7. 0.272 - 0.2735 = -0.0015 → (-0.0015)² = 0.00000225
+
+8. 0.272 - 0.2735 = -0.0015 → same as above: 0.00000225
+
+Total SST = 0.00001225 + 0.00005625 + 0.00002025 + 0.00000625 + 0.00000025 + 0.00004225 + 0.00000225 + 0.00000225
+
+Let's add them step by step:
+
+0.00001225 + 0.00005625 = 0.0000685
+
++0.00002025 = 0.00008875
+
++0.00000625 = 0.000095
+
++0.00000025 = 0.00009525
+
++0.00004225 = 0.0001375
+
++0.00000225 = 0.00013975
+
++0.00000225 = 0.000142
+
+So SST = 0.000142 exactly (as a decimal, it's 0.000142)
+
+SSR = (0.1155)^2 / 604.875 = (0.01334025) / 604.875 ≈ 0.00002206
+
+So let's compute this division precisely:
+
+0.01334025 ÷ 604.875
+
+First, 604.875 * 0.00002 = 0.0120975
+
+0.01334025 - 0.0120975 = 0.00124275
+
+604.875 * 0.000002 = 0.00120975
+
+0.00124275 - 0.00120975 = 0.000033
+
+So 0.00002 + 0.000002 = 0.000022, with a remainder of 0.000033, which is about 0.000000054. So SSR ≈ 0.00002206
+
+SSE = SST - SSR = 0.000142 - 0.00002206 ≈ 0.00011994
+
+So rounding to, say, 6 decimal places:
+
+(a) SST = 0.000142
+
+(b) SSR ≈ 0.000022
+
+(c) SSE ≈ 0.000120
+
+(d) R² = 0.00002206 / 0.000142 ≈ 0.1553, so 0.1553
+
+(e) 15.53%
+
+But let's check if the problem expects these values.
+
+Wait, but in the problem statement, it says "games won as the independent variable x". So x is games won (which is the predictor), and y is batting average (the response). But in reality, in sports, batting average is a measure of performance per game, and games won is the outcome. But the problem states it this way, so we have to go with it.
+
+But let's verify the calculations once more.
+
+Another way to compute SSR is using the formula:
+
+SSR = b² * sum (x_i - x̄)^2
+
+We have b = 0.924 / 4839 ≈ 0.000191
+
+sum (x_i - x̄)^2 = 604.875
+
+So SSR = (0.000191)^2 * 604.875 ≈ (0.000000036481) * 604.875 ≈ 0.00002206. Which matches.
+
+So that's correct.
+
+So the answers are:
+
+(a) SST = 0.000142
+
+(b) SSR ≈ 0.000022
+
+(c) SSE ≈ 0.000120
+
+(d) R² ≈ 0.155
+
+(e) 15.5%
+
+But let's present them with appropriate decimal places.
+
+The problem might expect answers rounded to, say, 6 decimal places or 5.
+
+Let's compute exact values:
+
+SST = 0.000142 (exactly 0.000142)
+
+SSR = (0.1155)^2 / 604.875 = 0.01334025 / 604.875 = 0.00002206 (approximately 0.000022)
+
+SSE = 0.000142 - 0.00002206 = 0.00011994 (approximately 0.000120)
+
+R² = 0.00002206 / 0.000142 ≈ 0.1553 (so 0.155)
+
+Percent: 15.53%, so approximately 15.5%
+
+But let's see if the problem expects more precise answers.
+
+Wait, let's compute R² exactly:
+
+R² = (sum (x_i - x̄)(y_i - ȳ))² / (sum (x_i - x̄)^2 * sum (y_i - ȳ)^2 )
+
+But sum (y_i - ȳ)^2 = SST = 0.000142
+
+sum (x_i - x̄)(y_i - ȳ) = 0.1155
+
+sum (x_i - x̄)^2 = 604.875
+
+So R² = (0.1155)^2 / (604.875 * 0.000142) = 0.01334025 / (0.0859) ≈ 0.1553
+
+Yes, so R² ≈ 0.1553
+
+So the answers:
+
+(a) 0.000142
+
+(b) 0.000022
+
+(c) 0.000120
+
+(d) 0.155
+
+(e) 15.5%
+
+But let's check if the problem expects these numbers.
+
+Wait, but in the problem statement, the answers are to be placed in [ANS]. Let's make sure.
+
+Wait, the problem says "Compute the value of SST (Total Sum of Squares) answer: [ANS]"
+
+So we need to write the exact value.
+
+But in the calculations, SST is exactly 0.000142 (as per the sum of squares).
+
+Similarly, SSR is 0.00002206, which we can write as 0.000022 (rounded to 6 decimal places).
+
+SSE is 0.00011994, so 0.000120.
+
+R² is approximately 0.155.
+
+Percent is approximately 15.5%.
+
+But let's see if the problem expects more precise answers.
+
+Alternatively, maybe I made a mistake in assuming which variable is which. Wait, the problem says "the number of games won by a major league baseball team in a season related to the team batting average". So typically, you'd expect to model games won as a function of batting average, but the problem states: "Using games won as the independent variable x". So x is games won, y is batting average. So the regression is y ~ x.
+
+But in reality, it's more likely that batting average is the predictor and games won is the response, but the problem says to use games won as x. So we have to go with that.
+
+Another check: the correlation coefficient r = sum (x_i - x̄)(y_i - ȳ) / sqrt(sum (x_i - x̄)^2 * sum (y_i - ȳ)^2 )
+
+So r = 0.1155 / sqrt(604.875 * 0.000142) = 0.1155 / sqrt(0.0859) ≈ 0.1155 / 0.0927 ≈ 1.246. Wait, that can't be. Wait, no, sqrt(604.875 * 0.000142) = sqrt(0.0859) ≈ 0.0927. So r = 0.1155 / 0.0927 ≈ 1.246. But correlation coefficient can't be more than 1. So this indicates a mistake.
+
+Ah! Here's the problem. I think I mixed up the variables. The problem says "the number of games won... related to the team batting average". So the relationship is between games won and batting average. But in the regression, we need to decide which is x (independent) and y (dependent). The problem states: "Using games won as the independent variable x". So x is games won (predictor), y is batting average (response). But when we computed the correlation, we got a value greater than 1, which is impossible, so there must be a mistake in the calculation.
+
+Wait, let's recompute sum (x_i - x̄)(y_i - ȳ).
+
+sum (x_i - x̄)(y_i - ȳ) = sum_xy - n x̄ ȳ = 199.497 - 8*(91.125)*(0.2735)
+
+Compute 91.125 * 0.2735:
+
+91.125 * 0.2 = 18.225
+
+91.125 * 0.07 = 6.37875
+
+91.125 * 0.0035 = 0.3189375
+
+Total: 18.225 + 6.37875 = 24.60375 + 0.3189375 = 24.9226875
+
+Multiply by 8: 24.9226875 * 8 = 199.3815
+
+sum_xy = 199.497
+
+So sum (x_i - x̄)(y_i - ȳ) = 199.497 - 199.3815 = 0.1155. Correct.
+
+sum (x_i - x̄)^2 = 604.875
+
+sum (y_i - ȳ)^2 = 0.000142
+
+So the correlation coefficient r = 0.1155 / sqrt(604.875 * 0.000142) = 0.1155 / sqrt(0.0859) ≈ 0.1155 / 0.0927 ≈ 1.246. Which is impossible. This means that the calculation is wrong.
+
+Ah! I see the mistake. The problem states that the team batting average is a value like 0.277, which is a decimal with three places, but in the sum, I think I made a mistake in the sum_xy.
+
+Wait, let's recompute sum_xy.
+
+Let's list all the products:
+
+Team 1: 105 * 0.277
+
+105 * 0.277:
+
+100 * 0.277 = 27.7
+
+5 * 0.277 = 1.385
+
+Total: 27.7 + 1.385 = 29.085. Correct.
+
+Team 2: 97 * 0.281
+
+97 * 0.281:
+
+97 * 0.2 = 19.4
+
+97 * 0.08 = 7.76
+
+97 * 0.001 = 0.097
+
+Total: 19.4 + 7.76 = 27.16 + 0.097 = 27.257. Correct.
+
+Team 3: 78 * 0.269
+
+78 * 0.269:
+
+70 * 0.269 = 18.83
+
+8 * 0.269 = 2.152
+
+Total: 18.83 + 2.152 = 20.982. Correct.
+
+Team 4: 94 * 0.276
+
+94 * 0.276:
+
+90 * 0.276 = 24.84
+
+4 * 0.276 = 1.104
+
+Total: 24.84 + 1.104 = 25.944. Correct.
+
+Team 5: 82 * 0.274
+
+82 * 0.274:
+
+80 * 0.274 = 21.92
+
+2 * 0.274 = 0.548
+
+Total: 21.92 + 0.548 = 22.468. Correct.
+
+Team 6: 99 * 0.267
+
+99 * 0.267 = (100 - 1) * 0.267 = 26.7 - 0.267 = 26.433. Correct.
+
+Team 7: 90 * 0.272 = 24.48. Correct.
+
+Team 8: 84 * 0.272
+
+84 * 0.272:
+
+80 * 0.272 = 21.76
+
+4 * 0.272 = 1.088
+
+Total: 21.76 + 1.088 = 22.848. Correct.
+
+Sum of products: 29.085 + 27.257 + 20.982 + 25.944 + 22.468 + 26.433 + 24.48 + 22.848
+
+Let's add them again:
+
+29.085 + 27.257 = 56.342
+
+56.342 + 20.982 = 77.324
+
+77.324 + 25.944 = 103.268
+
+103.268 + 22.468 = 125.736
+
+125.736 + 26.433 = 152.169
+
+152.169 + 24.48 = 176.649
+
+176.649 + 22.848 = 199.497. Correct.
+
+So sum_xy is correct.
+
+sum_x = 729, correct.
+
+sum_y = 2.188, correct.
+
+sum_y² = 0.59856, correct.
+
+SST = 0.000142, correct.
+
+The issue with the correlation coefficient is that it's impossible to have r > 1, so there must be a mistake in the calculation.
+
+Wait, no: the correlation coefficient is sum (x_i - x̄)(y_i - ȳ) / [sqrt(sum (x_i - x̄)^2) * sqrt(sum (y_i - ȳ)^2)]
+
+We have:
+
+sum (x_i - x̄)(y_i - ȳ) = 0.1155
+
+sum (x_i - x̄)^2 = 604.875
+
+sum (y_i - ȳ)^2 = 0.000142
+
+So the denominator is sqrt(604.875) * sqrt(0.000142) ≈ 24.594 * 0.01192 ≈ 0.293
+
+Then r = 0.1155 / 0.293 ≈ 0.394. Ah! I see, I miscalculated the denominator earlier.
+
+sqrt(604.875) = approx 24.594
+
+sqrt(0.000142) = approx 0.01192
+
+So denominator = 24.594 * 0.01192 ≈ 0.293
+
+r = 0.1155 / 0.293 ≈ 0.394, which is valid.
+
+So that's correct. My earlier mistake was in calculating the denominator.
+
+So the correlation coefficient is about 0.394, which is reasonable.
+
+So the calculations are correct.
+
+Thus, the answers are:
+
+(a) SST = 0.000142
+
+(b) SSR ≈ 0.000022
+
+(c) SSE ≈ 0.000120
+
+(d) R² ≈ 0.155
+
+(e) 15.5%
+
+But let's present them with 6 decimal places as per the problem's example.
+
+Wait, the problem says "the coefficient of determination is answer: [ANS]". It's a number, so we can write it as 0.1553.
+
+Similarly, the percentages.
+
+But the problem might expect the answers to be rounded to certain decimal places.
+
+Let's compute them more precisely.
+
+SSR = (0.1155)^2 / 604.875 = 0.01334025 / 604.875 = 0.00002206 (so 0.000022)
+
+SSE = 0.000142 - 0.00002206 = 0.00011994 (so 0.000120)
+
+R² = 0.00002206 / 0.000142 = 0.1553 (so 0.155)
+
+Percentage: 15.53%, so 15.5%
+
+But let's check if the problem expects the answers in a specific format.
+
+The problem says "compute the value of SST", etc.
+
+In the examples, they used simple numbers, but here we have decimals.
+
+Let's write the answers with 6 decimal places.
+
+(a) SST: 0.000142 (exactly 0.000142)
+
+(b) SSR: 0.000022
+
+(c) SSE: 0.000120
+
+(d) R²: 0.1553 (or 0.155)
+
+(e) 15.53% (or 15.5%)
+
+But the problem says "What percent of variation...", so the answer is a percentage, like 15.5%.
+
+But let's see.
+
+Given the calculations:
+
+- SST = 0.000142
+
+- SSR = 0.00002206 ≈ 0.000022
+
+- SSE = 0.000142 - 0.00002206 = 0.00011994 ≈ 0.000120
+
+- R² = 0.1553
+
+- Percentage: 15.53%
+
+But the problem might expect these values rounded to 4 decimal places.
+
+Let's compute them precisely:
+
+SST = 0.000142 (exactly 0.000142)
+
+SSR = 0.00002206 → 0.000022 (to 6 decimal places)
+
+SSE = 0.00011994 → 0.000120 (to 6 decimal places)
+
+R² = 0.1553 → 0.1553
+
+Percentage: 15.53%
+
+But the problem says "answer: [ANS]", so we need to put the numerical values.
+
+Let me check with another approach.
+
+Alternatively, use the formula for SSR:
+
+SSR = (n * sum_xy - sum_x * sum_y)^2 / (n * sum_x² - (sum_x)^2)
+
+Which is the same as [numerator]^2 / [denominator] where numerator is 0.924, denominator is 4839.
+
+So SSR = (0.924)^2 / 4839 = 0.853776 / 4839 ≈ 0.000176, wait no.
+
+Wait, no, the formula for SSR in simple linear regression is [sum (x_i - x̄)(y_i - ȳ)]² / sum (x_i - x̄)^2
+
+But sum (x_i - x̄)(y_i - ȳ) = (n sum_xy - sum_x sum_y)/n = (0.924)/8 = 0.1155 (since n sum_xy - sum_x sum_y = 0.924, so divided by n gives the covariance sum)
+
+Yes, so sum (x_i - x̄)(y_i - ȳ) = 0.1155
+
+sum (x_i - x̄)^2 = 604.875
+
+So SSR = (0.1155)^2 / 604.875 = 0.01334025 / 604.875 = 0.00002206
+
+So that's correct.
+
+Thus, the answers are:
+
+(a) 0.000142
+
+(b) 0.000022
+
+(c) 0.000120
+
+(d) 0.155
+
+(e) 15.5
+
+But the problem might expect the answers rounded to 4 decimal places or 5.
+
+Let's write them as:
+
+(a) 0.000142
+
+(b) 0.000022
+
+(c) 0.000120
+
+(d) 0.1553
+
+(e) 15.53
+
+But in the problem statement, the answers are to be boxed.
+
+Wait, the problem says "If the problem has multiple sub-answers, separate them by commas inside a single \boxed{}"
+
+So for this problem, the answers are (a) to (e), so we need to write all five answers in the box separated by commas.
+
+But let's confirm the values.
+
+Wait, in the calculation of SST, it's exactly 0.000142. Let's write it as 0.000142.
+
+SSR: 0.000022 (rounded to 8 decimal places)
+
+SSE: 0.000120
+
+R²: 0.1553
+
+Percentage: 15.53%
+
+But the problem might expect more precise or rounded answers.
+
+Alternatively, maybe the problem expects the answers to be in scientific notation or with certain decimals.
+
+But given the calculations, I think the answers are as follows.
+
+Let me check with a calculator.
+
+Alternatively, use a different method.
+
+Let's compute the regression line.
+
+We have:
+
+b = (n sum_xy - sum_x sum_y) / (n sum_x² - (sum_x)^2) = (0.924) / 4839 ≈ 0.000191
+
+a = ȳ - b x̄ ≈ 0.2735 - 0.000191 * 91.125 ≈ 0.2735 - 0.0174 ≈ 0.2561
+
+So the regression line is ŷ = 0.2561 + 0.000191 x
+
+Now, compute SSR as sum (ŷ_i - ȳ)^2.
+
+For each team, compute ŷ_i, subtract ȳ, square, sum.
+
+Let's take team 1: x=105, ŷ=0.2561 + 0.000191*105 ≈ 0.2561 + 0.020055 ≈ 0.276155
+
+ȳ=0.2735, so (0.276155 - 0.2735)^2 = (0.002655)^2 ≈ 0.00000705
+
+Team 2: x=97, ŷ=0.2561 + 0.000191*97 ≈ 0.2561 + 0.018527 ≈ 0.274627
+
+(0.274627 - 0.2735)^2 = (0.001127)^2 ≈ 0.00000127
+
+Team 3: x=78, ŷ=0.2561 + 0.000191*78 ≈ 0.2561 + 0.0149 ≈ 0.2710
+
+(0.2710 - 0.2735)^2 = (-0.0025)^2 = 0.00000625
+
+Team 4: x=94, ŷ=0.2561 + 0.000191*94 ≈ 0.2561 + 0.018054 ≈ 0.274
