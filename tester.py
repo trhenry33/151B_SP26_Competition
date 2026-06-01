@@ -11,10 +11,15 @@ print("imports work")
 #baseline is 60% with first 10
 #basline is 50% with first 20 - MC: 4/9 FR: 6/11
 #reflection is same as baseline
+#self consistency is same
+#chain of thought is same
+#fewshot with others : 55%
+#jsut fewshot: 65% - entire: 57.82%
 
 #to test: rm results/count.txt and change the output path on this file to start a new file to check.
 
-#travis test path so far: baseline -> reflective
+#travis test path so far: baseline -> reflective _> MC self consistency _> chain of thought -> fewshot example
+#new travis path: baseline -> fewshot -> SFT/LoRA
 
 import json, os, re, sys
 from pathlib import Path
@@ -53,12 +58,54 @@ print(json.dumps(free_sample, indent=2))
 
 #prompt
 
+# SYSTEM_PROMPT_MATH = (
+#     "You are an expert mathematician. Solve the problem step-by-step. "
+#     "Think through the problem step-by-step before answering. "
+#     "Show your reasoning clearly and logically. "
+#     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
+#     "Put your final answer inside \\boxed{}. "
+#     "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
+#     "e.g. \\boxed{3, 7}."
+# )
+
+# SYSTEM_PROMPT_MCQ = (
+#     "You are an expert mathematician. "
+#     "Think through the problem step-by-step before answering. "
+#     "Show your reasoning clearly and logically. "
+#     "Solve the problem carefully and consider multiple possible solution paths before choosing an answer. "
+#     "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer." 
+#     "Verify the final choice against all options. "
+#     "Output ONLY the letter of your chosen option inside \\boxed{}, e.g. \\boxed{C}."
+# )
+
+# SYSTEM_PROMPT_MATH = (
+#     "You are an expert mathematician. Solve carefully but keep the work concise. "
+#     "Do NOT write a second explanation after the thinking section. "
+#     "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
+#     "If the problem has multiple [ANS] blanks, count them and give answers in the same order, separated by commas. "
+#     "If you are unsure or the problem is long, still make your best final answer instead of continuing indefinitely. "
+#     "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{3, 7}."
+# )
+
+# SYSTEM_PROMPT_MCQ = (
+#     "You are an expert mathematician. Solve carefully but keep the work concise. "
+#     "Compare your result against the answer choices before finalizing. "
+#     "Do NOT write a second explanation after the thinking section. "
+#     "Never use \\boxed{} for intermediate values. Use \\boxed{} exactly once, only on the final line. "
+#     "For a normal multiple-choice problem, output one letter only. "
+#     "If the problem explicitly asks for multiple choices or multiple blanks, output the letters in order separated by commas. "
+#     "If you are unsure, choose the best matching option instead of continuing indefinitely. "
+#     "The last line must be exactly one boxed answer and nothing else, e.g. \\boxed{C}."
+# )
+
 SYSTEM_PROMPT_MATH = (
-    "You are an expert mathematician. Solve the problem step-by-step. "
-    "Before finalizing, verify calculations, algebra, and formatting mistakes. Correct any errors before giving the final boxed answer."
-    "Put your final answer inside \\boxed{}. "
-    "If the problem has multiple sub-answers, separate them by commas inside a single \\boxed{}, "
-    "e.g. \\boxed{3, 7}."
+    "You are an expert mathematician taking a timed exam. Solve directly and carefully. "
+    "Do not ramble, debate interpretations, or write a second solution after finishing. "
+    "Preserve the requested answer form. Prefer exact symbolic answers when natural, such as fractions, radicals, powers, or pi expressions. "
+    "For numerical answers, keep high precision: use at least 8 significant digits when possible and do not round unless the problem explicitly asks. "
+    "If the problem has multiple [ANS] blanks, count every blank and answer all of them in order. "
+    "Do not box intermediate values. Use \\boxed{} exactly once, on the final line only. "
+    "The final line must contain only the boxed answer, with multiple answers separated by commas."
 )
 
 SYSTEM_PROMPT_MCQ = (
@@ -121,6 +168,77 @@ def build_few_shot_block(options: Optional[list]) -> str:
     return FEWSHOT_MCQ if options else FEWSHOT_MATH
 
 
+FEWSHOT_MATH = """
+        Here are solved examples of the required answer style.
+
+        Example 1
+        Problem: Compute 6 * 7.
+        <think>
+        6 * 7 = 42.
+        </think>
+        \\boxed{42}
+
+        Example 2
+        Problem: Simplify 12/16.
+        <think>
+        Divide numerator and denominator by 4 to get 3/4.
+        </think>
+        \\boxed{\\frac{3}{4}}
+
+        Example 3
+        Problem: Give the exact fraction remaining after 36 years if the half-life is 31 years. [ANS]
+        <think>
+        This is exponential decay. The exact fraction remaining is (1/2)^(36/31). Since exact form is requested, do not convert to decimal.
+        </think>
+        \boxed{(1/2)^{36/31}}
+
+        Example 4
+        Problem: Fill the table values: x values [ANS], x^2 values [ANS], sum [ANS], average [ANS], square root [ANS]
+        <think>
+        There are five blanks, so every requested table entry must be included in order.
+        </think>
+        \boxed{-10, 100, -9, 81, 304, 60.8, 7.797}
+
+        Now solve the next problem in the same format.
+        """
+
+FEWSHOT_MCQ = """
+
+        Here are solved examples of the required answer style.
+
+        Example 1
+        Problem: Which option equals 9 - 4?
+        Options:
+        A. 3
+        B. 5
+        C. 7
+        <think>
+        9 - 4 = 5, so option B is correct.
+        </think>
+        \\boxed{B}
+
+        Example 2
+        Problem: Which option is the next number after 8?
+        Options:
+        A. 7
+        B. 9
+        C. 10
+        <think>
+        The next integer after 8 is 9, so option B is correct.
+        </think>
+        \\boxed{B}
+
+    
+
+        Now solve the next problem in the same format.
+"""
+
+
+
+def build_few_shot_block(options: Optional[list]) -> str:
+    return FEWSHOT_MCQ if options else FEWSHOT_MATH
+
+
 def build_prompt(question: str, options: Optional[list]) -> tuple[str, str]:
     """Return (system_prompt, user_prompt) for a question."""
     if options:
@@ -140,7 +258,10 @@ for label, item in [("MCQ", mcq_sample), ("Free-form", free_sample)]:
 
 #load model
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
+from transformers import AutoTokenizer
+from vllm import LLM, SamplingParams
+
+MODEL_ID = "Qwen/Qwen3-4B-Thinking-2507"
 
 MAX_TOKENS = 16384   # doubled generation budget
 
@@ -151,10 +272,11 @@ llm = LLM(
     gpu_memory_utilization=0.9,   # lower this
     max_model_len=24576,            # allow longer prompts + doubled generation
     trust_remote_code=True,
+    gpu_memory_utilization=0.9,
+    max_model_len=8192,
     max_num_seqs=1,
-    max_num_batched_tokens=4096,
 )
-
+MAX_TOKENS = 8192
 sampling_params = SamplingParams(
     max_tokens=MAX_TOKENS,
     temperature=0.6,
@@ -172,8 +294,7 @@ BATCH_SIZE = 5
 out_path = Path(OUTPUT_PATH)
 out_path.parent.mkdir(parents=True, exist_ok=True)
 
-count_path = out_path.parent / f"{out_path.stem}_count.txt"
-
+count_path = out_path.with_suffix(".count.txt")
 # Resume point
 if count_path.exists():
     start_idx = int(count_path.read_text().strip())
