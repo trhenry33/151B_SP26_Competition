@@ -1,15 +1,22 @@
-# CSE 151B Competition — Starter Code
+# CSE 151B Competition
 
-Open **`starter_code_cse151b_comp.ipynb`** to get started.
+## GPU
+We ran our work on the A30 GPU in the DSMLP Cluster. It should take around 12 hours to generate all results for the private set.
 
-The notebook covers environment setup, inference with Qwen3-4B-Thinking (INT8), and scoring against the public dataset.
+## Setup
+To setup run final_setup.py located in the the setup directory. If this does not work, look inside final_setup.py to see the manual installs and uninstalls of numpy and vllm.
 
-## Contents
+## Weights
+There are no weights to download.
 
-| File | Description |
-|---|---|
-| `starter_code_cse151b_comp.ipynb` | Main entry point |
-| `judger.py` | Response scoring logic |
-| `utils.py` | Utilities used by `judger.py` |
-| `data/public.jsonl` | Public dataset with ground-truth answers |
-| `results/` | Output JSONL files written at runtime |
+## How to Run
+Run material is all in run.py, just run that on an a30 GPU or one or similar calliber, and then check run_inference_final.csv for results.
+If you wish to only run 200, change the run_end_idx, and if you wish to choose a different data file, change the DATA_PATH.
+
+
+
+
+
+
+
+
