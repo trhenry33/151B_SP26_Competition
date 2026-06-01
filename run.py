@@ -150,7 +150,7 @@ def run_inference():
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
 
-    MAX_TOKENS = 16384   # doubled generation budget
+    MAX_TOKENS = 1024   # doubled generation budget
 
     llm = LLM(
         model=MODEL_ID,
