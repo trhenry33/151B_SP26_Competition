@@ -2,8 +2,10 @@
 
 
 #change run_end_idx to 200 if you just want to run 200
-
-
+from vllm import LLM, SamplingParams
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["VLLM_USE_V1"] = "0"
 def run_inference():
     
     import numpy
