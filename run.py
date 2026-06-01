@@ -188,8 +188,8 @@ def run_inference():
     else:
         start_idx = 0
 
-    #run_end_idx = len(data) # ======================= TA CHANGE THIS =================================================================================================
-    run_end_idx = 10
+    run_end_idx = len(data) # ======================= TA CHANGE THIS =================================================================================================
+    #run_end_idx = 200
     print(f"Starting full run at index {start_idx}; ending before {run_end_idx}", flush=True)
     # -------- SCORING HELPERS --------
 
