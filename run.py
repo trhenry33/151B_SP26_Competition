@@ -150,17 +150,14 @@ def run_inference():
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
 
-    MAX_TOKENS = 16384   # doubled generation budget
+    MAX_TOKENS = 1024   # doubled generation budget
 
     llm = LLM(
         model=MODEL_ID,
-        quantization="bitsandbytes",
-        load_format="bitsandbytes",
-        gpu_memory_utilization=0.9,   # lower this
-        max_model_len=24576,            # allow longer prompts + doubled generation
         trust_remote_code=True,
+        gpu_memory_utilization=0.85,
+        max_model_len=2048,
         max_num_seqs=1,
-        max_num_batched_tokens=4096,
     )
 
     sampling_params = SamplingParams(
